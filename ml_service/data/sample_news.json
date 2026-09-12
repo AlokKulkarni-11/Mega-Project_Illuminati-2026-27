@@ -1,0 +1,72 @@
+[
+  {
+    "id": "news-001",
+    "symbol": "TATASTEEL",
+    "published_at": "2026-08-02T18:30:00Z",
+    "title": "Tata Steel Reports Strong Q1 Earnings Beats Analyst Estimates",
+    "content": "Tata Steel announced a 35% year-on-year increase in net profit for Q1, driven by robust domestic demand and higher realisations in steel products. Total operational revenue increased significantly.",
+    "source": "Financial Express",
+    "sentiment": "bullish",
+    "causal_category": "earnings"
+  },
+  {
+    "id": "news-002",
+    "symbol": "TATASTEEL",
+    "published_at": "2026-08-04T20:00:00Z",
+    "title": "DGTR Proposes Anti-Dumping Duty on Cheap Steel Imports",
+    "content": "The Directorate General of Trade Remedies recommended imposing anti-dumping duty on steel imports from selected countries to protect domestic steel producers.",
+    "source": "Economic Times",
+    "sentiment": "bullish",
+    "causal_category": "regulatory"
+  },
+  {
+    "id": "news-003",
+    "symbol": "TATASTEEL",
+    "published_at": "2026-08-05T22:15:00Z",
+    "title": "Global Iron Ore Prices Drop sharp amid Macro Slowdown Concerns",
+    "content": "Iron ore futures slid by over 6% in international markets today as global growth concerns and Chinese factory slowdown weigh on metal demand.",
+    "source": "Reuters",
+    "sentiment": "bearish",
+    "causal_category": "macroeconomic"
+  },
+  {
+    "id": "news-004",
+    "symbol": "RELIANCE",
+    "published_at": "2026-08-02T19:00:00Z",
+    "title": "Reliance Retail Expands Footprint with New E-Commerce Fulfilment Hubs",
+    "content": "Reliance Industries retail arm announced the rollout of 50 new automated fulfilment centers across tier-2 cities, aiming to boost quick delivery services.",
+    "source": "Business Standard",
+    "sentiment": "bullish",
+    "causal_category": "company-specific"
+  },
+  {
+    "id": "news-005",
+    "symbol": "RELIANCE",
+    "published_at": "2026-08-04T17:45:00Z",
+    "title": "Crude Oil Margin Volatility Impacts O2C Segment Revenue",
+    "content": "Weak gross refining margins and fluctuating global crude oil prices hit refining segment returns for major Indian conglomerates during recent weeks.",
+    "source": "Mint",
+    "sentiment": "bearish",
+    "causal_category": "sector-specific"
+  },
+  {
+    "id": "news-006",
+    "symbol": "INFY",
+    "published_at": "2026-08-03T16:00:00Z",
+    "title": "Infosys Secures $1.5 Billion Multi-Year Digital Transformation Deal",
+    "content": "Infosys won a mega cloud and AI transformation contract from a leading European financial conglomerate, bolstering its multi-year deal pipeline.",
+    "source": "Moneycontrol",
+    "sentiment": "bullish",
+    "causal_category": "company-specific"
+  },
+  {
+    "id": "news-007",
+    "symbol": "TATASTEEL",
+    "published_at": "2026-08-10T10:00:00Z",
+    "title": "Tata Steel UK Plant Modernization Grant Approved",
+    "content": "The UK government formally signed off on financial support for green steel transition at the Port Talbot plant, securing future operations.",
+    "source": "Financial Times",
+    "sentiment": "bullish",
+    "causal_category": "regulatory"
+  }
+]
