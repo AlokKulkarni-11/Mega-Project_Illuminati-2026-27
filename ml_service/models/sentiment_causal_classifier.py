@@ -1,13 +1,19 @@
 import re
+import warnings
+import torch
 from pathlib import Path
 from typing import Dict, Any, List, Optional
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
+
+# Suppress harmless transformers clean_up_tokenization_spaces warnings
+warnings.filterwarnings("ignore", category=FutureWarning, module="transformers")
 
 
 class FinBertSentimentCausalClassifier:
     """
     Financial sentiment and causal category classifier pipeline.
     Uses FinBERT (ProsusAI/finbert) PyTorch Transformer model for sentiment inference,
-    coupled with causal category classification.
+    coupled with causal category classification. Automatically utilizes CUDA GPU if available.
     """
 
     SENTIMENT_LABELS = ["bullish", "bearish", "neutral"]
@@ -48,19 +54,30 @@ class FinBertSentimentCausalClassifier:
         self._pipeline_loaded = False
 
     def _get_pipeline(self):
-        """Lazy load PyTorch FinBERT pipeline if local checkpoint or fast connection available."""
+        """Lazy load PyTorch FinBERT pipeline using GPU (CUDA) if available."""
         if not self._pipeline_loaded:
             self._pipeline_loaded = True
             path = Path(self.model_dir)
-            if path.exists() and (path / "config.json").exists():
-                try:
-                    from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
-                    tokenizer = AutoTokenizer.from_pretrained(path)
+            device = 0 if torch.cuda.is_available() else -1
+            try:
+                if path.exists() and (path / "config.json").exists():
+                    tokenizer = AutoTokenizer.from_pretrained(path, clean_up_tokenization_spaces=True)
                     model = AutoModelForSequenceClassification.from_pretrained(path)
-                    self._pipeline = pipeline("sentiment-analysis", model=model, tokenizer=tokenizer)
-                except Exception as e:
-                    print(f"[Info] Local FinBERT checkpoint not loaded: {e}")
-                    self._pipeline = None
+                    self._pipeline = pipeline(
+                        "sentiment-analysis",
+                        model=model,
+                        tokenizer=tokenizer,
+                        device=device
+                    )
+                else:
+                    self._pipeline = pipeline(
+                        "sentiment-analysis",
+                        model="ProsusAI/finbert",
+                        device=device
+                    )
+            except Exception as e:
+                print(f"[Info] FinBERT GPU/CPU pipeline fallback: {e}")
+                self._pipeline = None
         return self._pipeline
 
     def analyze_text(self, text: str) -> Dict[str, Any]:
@@ -84,14 +101,15 @@ class FinBertSentimentCausalClassifier:
         sentiment_conf = 0.70
         model_used = "LexiconFallback"
 
-        # 1. FinBERT PyTorch Transformer Inference (Lazy)
+        # 1. FinBERT PyTorch Transformer Inference
         pipe = self._get_pipeline()
         if pipe is not None:
             try:
                 res = pipe(text[:512])[0]
                 raw_label = res["label"].lower()
                 sentiment_conf = float(res["score"])
-                model_used = "FinBERT_PyTorch"
+                device_str = "GPU (CUDA)" if torch.cuda.is_available() else "CPU"
+                model_used = f"FinBERT_PyTorch_{device_str}"
 
                 if "positive" in raw_label or "bullish" in raw_label:
                     sentiment = "bullish"
@@ -103,7 +121,7 @@ class FinBertSentimentCausalClassifier:
                 print(f"[Warning] FinBERT inference fallback: {e}")
 
         # Lexicon check if pipeline unavailable
-        if model_used == "LexiconFallback":
+        if "LexiconFallback" in model_used:
             bullish_count = len(words.intersection(self.BULLISH_WORDS))
             bearish_count = len(words.intersection(self.BEARISH_WORDS))
 
