@@ -1,16 +1,33 @@
+import joblib
 import numpy as np
 import pandas as pd
+from pathlib import Path
 from typing import Dict, Any, List, Optional
 
 
 class PricePatternClassifier:
     """
     Classifies stock price movement regimes (bullish, bearish, consolidating)
-    using technical indicators derived from historical OHLCV data.
+    using trained XGBoost machine learning model on technical features.
     """
 
-    def __init__(self):
-        self.classes = ["bullish", "bearish", "consolidating"]
+    LABEL_MAP = {0: "bullish", 1: "bearish", 2: "consolidating"}
+
+    def __init__(self, model_path: Optional[str] = None):
+        self.model_path = model_path or str(
+            Path(__file__).parent / "saved_models" / "price_xgb.joblib"
+        )
+        self.model = self._load_saved_model()
+
+    def _load_saved_model(self):
+        path = Path(self.model_path)
+        if path.exists():
+            try:
+                return joblib.load(path)
+            except Exception as e:
+                print(f"[Warning] Failed to load XGBoost model from {path}: {e}")
+                return None
+        return None
 
     def compute_technical_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -31,7 +48,7 @@ class PricePatternClassifier:
         data["sma_20"] = data["close"].rolling(window=min(20, len(data)), min_periods=1).mean()
         data["sma_50"] = data["close"].rolling(window=min(50, len(data)), min_periods=1).mean()
 
-        # Return & Volume Z-scores (rolling 20 window or max available)
+        # Return & Volume Z-scores
         window_size = min(20, max(2, len(data)))
         roll_mean = data["return"].rolling(window=window_size, min_periods=1).mean()
         roll_std = data["return"].rolling(window=window_size, min_periods=1).std().fillna(1e-5)
@@ -58,10 +75,8 @@ class PricePatternClassifier:
 
     def predict_regime(self, ohlcv_records: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
-        Given a list of OHLCV dictionary records, classifies the recent regime.
-        Returns:
-            dict containing regime ('bullish'|'bearish'|'consolidating'),
-            confidence score (0.0 to 1.0), and calculated features.
+        Given a list of OHLCV dictionary records, classifies the recent regime
+        using the trained XGBoost model or technical indicator heuristics.
         """
         if not ohlcv_records:
             return {
@@ -69,7 +84,8 @@ class PricePatternClassifier:
                 "confidence": 0.50,
                 "features": {},
                 "anomalous": False,
-                "z_score": 0.0
+                "return_zscore": 0.0,
+                "volume_zscore": 0.0
             }
 
         df = pd.DataFrame(ohlcv_records)
@@ -88,7 +104,42 @@ class PricePatternClassifier:
         close_px = float(latest.get("close", 0.0))
         sma20 = float(latest.get("sma_20", close_px))
 
-        # Classification Heuristic Logic (ML Model Stub & Feature Rule)
+        # 1. XGBoost ML Inference if model exists
+        if self.model is not None:
+            try:
+                feature_vector = pd.DataFrame([{
+                    "return_zscore": ret_z,
+                    "volume_zscore": vol_z,
+                    "rsi_14": rsi,
+                    "macd": macd_val,
+                    "macd_signal": macd_sig
+                }])
+                probs = self.model.predict_proba(feature_vector)[0]
+                pred_class_idx = int(np.argmax(probs))
+                regime = self.LABEL_MAP.get(pred_class_idx, "consolidating")
+                confidence = float(probs[pred_class_idx])
+
+                is_anomalous = abs(ret_z) >= 2.0 or vol_z >= 3.0
+
+                return {
+                    "regime": regime,
+                    "confidence": round(confidence, 4),
+                    "anomalous": is_anomalous,
+                    "return_zscore": round(ret_z, 2),
+                    "volume_zscore": round(vol_z, 2),
+                    "model_used": "XGBoost",
+                    "features": {
+                        "rsi_14": round(rsi, 2),
+                        "macd": round(macd_val, 4),
+                        "macd_signal": round(macd_sig, 4),
+                        "sma_20": round(sma20, 2),
+                        "last_close": round(close_px, 2)
+                    }
+                }
+            except Exception as e:
+                print(f"[Warning] XGBoost inference failed, falling back to heuristics: {e}")
+
+        # 2. Rule Heuristics Fallback
         score_bullish = 0.0
         score_bearish = 0.0
 
@@ -112,11 +163,6 @@ class PricePatternClassifier:
         else:
             score_bearish += 0.20
 
-        # High volume amplifies confidence
-        if vol_z > 2.0:
-            score_bullish *= 1.15
-            score_bearish *= 1.15
-
         if score_bullish > 0.55 and score_bullish > score_bearish:
             regime = "bullish"
             confidence = min(0.98, max(0.60, score_bullish))
@@ -135,6 +181,7 @@ class PricePatternClassifier:
             "anomalous": is_anomalous,
             "return_zscore": round(ret_z, 2),
             "volume_zscore": round(vol_z, 2),
+            "model_used": "HeuristicFallback",
             "features": {
                 "rsi_14": round(rsi, 2),
                 "macd": round(macd_val, 4),

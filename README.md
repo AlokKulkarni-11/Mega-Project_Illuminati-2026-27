@@ -5,7 +5,7 @@ Academic Project for **Walchand College of Engineering, Sangli** (Department of 
 
 ---
 
-## 🤖 Piyush Rajurkar's Module: ML & RAG Microservice
+<!-- ## 🤖 Piyush Rajurkar's Module: ML & RAG Microservice -->
 
 This repository contains **Piyush Rajurkar's** ML & RAG Causal Engine microservice (`ml_service/`), built with **Python & FastAPI**. It powers the quantitative pattern classification, sentiment & causal text analysis, signal agreement evaluation, and time-constrained RAG explanation generation for MarketMind.
 
