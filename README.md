@@ -5,42 +5,33 @@ Academic Project for **Walchand College of Engineering, Sangli** (Department of 
 
 ---
 
-<!-- ## 🤖 Piyush Rajurkar's Module: ML & RAG Microservice -->
+## 🤖 Piyush Rajurkar's Module: ML & RAG Microservice
 
-This repository contains **Piyush Rajurkar's** ML & RAG Causal Engine microservice (`ml_service/`), built with **Python & FastAPI**. It powers the quantitative pattern classification, sentiment & causal text analysis, signal agreement evaluation, and time-constrained RAG explanation generation for MarketMind.
+This repository contains **Piyush Rajurkar's** ML & RAG Causal Engine microservice (`ml_service/`), built with **Python & FastAPI**. It powers quantitative pattern classification, sentiment & causal text analysis, signal agreement evaluation, and time-constrained RAG explanation generation for MarketMind.
 
 ### 🌟 Key Features
-1. **Price-Pattern Classifier (`ml_service/models/price_classifier.py`)**: Predicts stock regimes (`bullish`, `bearish`, `consolidating`) using technical indicators (SMA_20, SMA_50, RSI_14, MACD, Volume/Return Z-scores).
-2. **FinBERT Sentiment & Causal Classifier (`ml_service/models/sentiment_causal_classifier.py`)**: Multi-task classification for news sentiment (`bullish`/`bearish`/`neutral`) and causal categories (`earnings`, `regulatory`, `geopolitical`, `macroeconomic`, `sector-specific`, `company-specific`).
+1. **True XGBoost Price Classifier (`ml_service/models/price_classifier.py`)**: Predicts stock regimes (`bullish`, `bearish`, `consolidating`) using technical indicators (SMA_20, SMA_50, RSI_14, MACD, Volume/Return Z-scores) with CUDA GPU & CPU support.
+2. **FinBERT PyTorch Sentiment & Causal Classifier (`ml_service/models/sentiment_causal_classifier.py`)**: Multi-task PyTorch Transformer pipeline (`ProsusAI/finbert`) for news sentiment (`bullish`/`bearish`/`neutral`) and causal categories (`earnings`, `regulatory`, `geopolitical`, `macroeconomic`, `sector-specific`, `company-specific`).
 3. **Signal-Agreement Engine (`ml_service/services/signal_agreement.py`)**: Evaluates alignment between price movement regimes and news sentiment (`consistent`, `divergent`, `ambiguous`).
-4. **Time-Constrained RAG Engine (`ml_service/services/rag_engine.py`)**: Enforces strict timestamp non-leakage ($t_{\text{published}} \le t_{\text{movement}}$) to prevent hindsight bias, returns passage citations, and explicitly **abstains** when evidence prior to the event is insufficient.
+4. **Time-Constrained RAG Engine (`ml_service/services/rag_engine.py`)**: Dense vector embeddings (`all-MiniLM-L6-v2`) with strict timestamp non-leakage ($t_{\text{published}} \le t_{\text{movement}}$) to prevent hindsight bias, returning citations and explicit **abstention** when prior evidence is missing.
 5. **Day 0 Compliant FastAPI Server (`ml_service/main.py`)**: REST microservice designed for internal integration with Alok Kulkarni's Spring Boot backend.
+6. **Rich Terminal CLI Dashboard (`ml_service/cli.py`)**: Full interactive and command-line terminal interface rendering live colorized panels, tables, metrics, and citations.
 
 ---
 
-## 📂 Microservice Directory Structure
+## 💻 Terminal CLI Dashboard Commands
 
-```
-ml_service/
-├── data/
-│   ├── sample_ohlcv.csv         # Sample OHLCV dataset (TATASTEEL, RELIANCE, INFY)
-│   └── sample_news.json          # Timestamped financial news corpus for RAG
-├── models/
-│   ├── price_classifier.py       # Technical indicator computation & regime classifier
-│   └── sentiment_causal_classifier.py  # FinBERT multi-task sentiment & cause predictor
-├── services/
-│   ├── signal_agreement.py      # Price vs text signal alignment engine
-│   └── rag_engine.py            # Time-constrained RAG & abstention synthesizer
-├── api/
-│   ├── schemas.py               # Pydantic request/response schemas
-│   └── routes.py                # FastAPI endpoint handlers
-├── tests/
-│   ├── test_price_classifier.py  # Unit tests for price classifier
-│   ├── test_sentiment_causal.py # Unit tests for sentiment & cause model
-│   ├── test_rag_engine.py       # Unit tests for time-constrained RAG & abstention
-│   └── test_api.py              # End-to-end FastAPI endpoint tests
-├── main.py                      # FastAPI microservice entrypoint
-└── requirements.txt             # Python dependencies
+Run MarketMind analysis directly in your terminal:
+
+```powershell
+# Analyze stock movement for TATASTEEL on 2026-08-03:
+python ml_service/cli.py --symbol TATASTEEL --date 2026-08-03
+
+# Run interactive prompt mode:
+python ml_service/cli.py --interactive
+
+# Test explicit abstention safeguard (date prior to news corpus):
+python ml_service/cli.py --symbol INFY --date 2020-01-01
 ```
 
 ---
@@ -52,16 +43,23 @@ ml_service/
 pip install -r ml_service/requirements.txt
 ```
 
-### 2. Run the FastAPI Microservice
+### 2. Train Models & Run Test Suite
+```bash
+# Train XGBoost Price Model:
+python ml_service/scripts/train_price_classifier.py
+
+# Export FinBERT Transformer Model:
+python ml_service/scripts/train_finbert.py
+
+# Run Complete Test Suite:
+python ml_service/run_tests.py
+```
+
+### 3. Run FastAPI Microservice Server
 ```bash
 python -m uvicorn ml_service.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 Access Interactive API Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
-
-### 3. Run Automated Tests
-```bash
-pytest ml_service/tests/ -v
-```
 
 ---
 
