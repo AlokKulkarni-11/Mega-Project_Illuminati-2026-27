@@ -1,0 +1,26 @@
+# Core pipeline (pipeline/marketmind_pipeline.py)
+pandas>=2.0
+numpy>=1.24
+feedparser>=6.0
+requests>=2.31
+
+# LLM providers — install whichever you use (both are fine to have)
+google-genai>=0.3.0      # Gemini (default provider)
+anthropic>=0.40.0        # Claude (alternate provider, --provider anthropic)
+
+# Optional: experimental full-article-text retrieval (--fulltext flag)
+# googlenewsdecoder
+# trafilatura
+
+# Module B1 — price-pattern classifier
+xgboost>=2.0
+scikit-learn>=1.3
+
+# Module B2 — BERT fine-tuning (needs real disk space + GPU; not installed in
+# constrained environments — run on your own machine or Colab)
+# transformers>=4.40
+# torch>=2.2
+# sentence-transformers>=2.6
+
+# Module B3 — RAG engine (once Postgres/pgvector is live)
+# psycopg2-binary>=2.9

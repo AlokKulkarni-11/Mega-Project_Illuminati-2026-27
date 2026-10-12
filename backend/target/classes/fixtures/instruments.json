@@ -1,0 +1,32 @@
+[
+  {
+    "symbol": "NIFTYBANK",
+    "name": "Nifty Bank Index",
+    "type": "index",
+    "sector": "Banking & Financial Services"
+  },
+  {
+    "symbol": "TCS",
+    "name": "Tata Consultancy Services",
+    "type": "stock",
+    "sector": "Information Technology"
+  },
+  {
+    "symbol": "INFY",
+    "name": "Infosys Limited",
+    "type": "stock",
+    "sector": "Information Technology"
+  },
+  {
+    "symbol": "RELIANCE",
+    "name": "Reliance Industries",
+    "type": "stock",
+    "sector": "Energy & Conglomerate"
+  },
+  {
+    "symbol": "HDFCBANK",
+    "name": "HDFC Bank Limited",
+    "type": "stock",
+    "sector": "Banking & Financial Services"
+  }
+]

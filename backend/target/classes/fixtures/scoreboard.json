@@ -1,0 +1,6 @@
+{
+  "totalAnalyzed": 12,
+  "explainedCount": 7,
+  "unexplainedCount": 5,
+  "summary": "7 of 12 backtested moves had a sourced driver; 5 were left unexplained."
+}

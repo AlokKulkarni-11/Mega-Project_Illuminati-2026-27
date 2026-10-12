@@ -1,0 +1,83 @@
+[
+  {
+    "symbol": "TCS",
+    "date": "2026-09-15",
+    "direction": "bearish",
+    "returnPct": -4.20,
+    "returnZ": -2.60,
+    "label": "Overseas Client Budget Freeze",
+    "confidence": "high"
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-02-03",
+    "direction": "bullish",
+    "returnPct": 2.43,
+    "returnZ": 2.47,
+    "label": "Post-Budget Rebound Move",
+    "confidence": "unconfirmed"
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-06-12",
+    "direction": "bullish",
+    "returnPct": 2.97,
+    "returnZ": 2.43,
+    "label": "Draft US-Iran Ceasefire Rally",
+    "confidence": "high"
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-03-09",
+    "direction": "bearish",
+    "returnPct": -3.05,
+    "returnZ": -2.42,
+    "label": "Global Spillover & FII Selling",
+    "confidence": "high"
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-07-08",
+    "direction": "bearish",
+    "returnPct": -2.51,
+    "returnZ": -2.42,
+    "label": "Geopolitical Flare & Crude Surge",
+    "confidence": "high"
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-02-01",
+    "direction": "bearish",
+    "returnPct": -2.00,
+    "returnZ": -2.33,
+    "label": "Budget 2026 PSU Bank Selloff",
+    "confidence": "high"
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-04-08",
+    "direction": "bullish",
+    "returnPct": 5.67,
+    "returnZ": 2.27,
+    "label": "Global Benchmark Jump",
+    "confidence": "high"
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-09-15",
+    "direction": "bearish",
+    "returnPct": -1.43,
+    "returnZ": -2.20,
+    "label": "Index Technical Breakdown",
+    "confidence": "unconfirmed"
+  },
+  {
+    "symbol": "RELIANCE",
+    "date": "2026-09-15",
+    "direction": "bullish",
+    "returnPct": 3.60,
+    "returnZ": 2.10,
+    "label": "Retail Demerger Timeline",
+    "confidence": "high"
+  }
+]

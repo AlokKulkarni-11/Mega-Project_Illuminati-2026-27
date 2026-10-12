@@ -1,0 +1,63 @@
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+spring:
+  application:
+    name: marketmind-backend
+
+  datasource:
+    url: ${DB_URL:jdbc:h2:mem:marketmind;DB_CLOSE_DELAY=-1;MODE=PostgreSQL}
+    username: ${DB_USER:sa}
+    password: ${DB_PASSWORD:}
+    hikari:
+      connection-timeout: 20000
+      maximum-pool-size: 10
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          lob:
+            non_contextual_creation: true
+
+  flyway:
+    enabled: ${FLYWAY_ENABLED:false}
+    baseline-on-migrate: true
+    locations:
+      - classpath:db/migration/app
+
+marketmind:
+  jwt:
+    secret: ${JWT_SECRET:4f8b92c1e7a3d6f08152b49c3e7a1d5f80b2c4e6a8d0f2a4c6e8b0d2f4a6c8e0}
+    expiration-ms: ${JWT_EXPIRATION_MS:3600000} # 1 hour
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://localhost:3000}
+  engine:
+    mode: ${ENGINE_MODE:mock} # disabled | mock | http
+    base-url: ${ENGINE_BASE_URL:http://localhost:8000}
+    timeout-ms: 15000
+    schema:
+      enabled: ${MARKETMIND_ENGINE_SCHEMA_ENABLED:false}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always

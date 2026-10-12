@@ -1,0 +1,38 @@
+[
+  {
+    "sector": "Banking & Financial Services",
+    "sentiment": "bearish",
+    "changePct": -1.43,
+    "topSymbols": ["NIFTYBANK", "HDFCBANK", "SBIN", "ICICIBANK"]
+  },
+  {
+    "sector": "Information Technology",
+    "sentiment": "bearish",
+    "changePct": -2.85,
+    "topSymbols": ["TCS", "INFY", "WIPRO", "HCLTECH"]
+  },
+  {
+    "sector": "Energy & Oil",
+    "sentiment": "bullish",
+    "changePct": 1.74,
+    "topSymbols": ["RELIANCE", "ONGC", "BPCL", "IOC"]
+  },
+  {
+    "sector": "Automobile",
+    "sentiment": "neutral",
+    "changePct": 0.32,
+    "topSymbols": ["TATAMOTORS", "M&M", "MARUTI"]
+  },
+  {
+    "sector": "Pharmaceuticals",
+    "sentiment": "bullish",
+    "changePct": 1.15,
+    "topSymbols": ["SUNPHARMA", "CIPLA", "DRREDDY"]
+  },
+  {
+    "sector": "Fast Moving Consumer Goods",
+    "sentiment": "neutral",
+    "changePct": -0.21,
+    "topSymbols": ["ITC", "HINDUNILVR", "NESTLEIND"]
+  }
+]

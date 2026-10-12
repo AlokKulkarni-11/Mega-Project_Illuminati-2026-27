@@ -1,0 +1,1 @@
+import{a}from"./index-xVgaom7O.js";const e=async()=>(await a.get("/watchlist")).data,i=async t=>(await a.post("/watchlist",{symbol:t})).data,r=async t=>{await a.delete(`/watchlist/${t}`)},n=async t=>(await a.get("/watchlist/check",{params:{symbol:t}})).data.inWatchlist;export{i as a,n as c,e as g,r};

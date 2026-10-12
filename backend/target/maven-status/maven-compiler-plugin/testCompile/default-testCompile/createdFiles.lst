@@ -1,0 +1,13 @@
+com\marketmind\engine\EngineModeMatrixTest.class
+com\marketmind\history\QueryHistoryControllerTest.class
+com\marketmind\engine\EngineModeMatrixTest$DisabledModeTests.class
+com\marketmind\query\QueryResolutionTest.class
+com\marketmind\watchlist\WatchlistControllerTest.class
+com\marketmind\feedback\ExplanationFeedbackControllerTest.class
+com\marketmind\engine\EngineModeMatrixTest$MockModeTests.class
+com\marketmind\engine\EngineModeMatrixTest$HttpDownModeTests.class
+com\marketmind\auth\AuthControllerTest.class
+com\marketmind\engine\HttpInsightEngineWireMockTest.class
+com\marketmind\engine\CapabilitiesTest.class
+com\marketmind\engine\MockInsightEngineTest.class
+com\marketmind\engine\AbstractInsightEngineContractTest.class

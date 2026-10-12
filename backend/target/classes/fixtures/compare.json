@@ -1,0 +1,39 @@
+{
+  "rows": [
+    {
+      "symbol": "TCS",
+      "latestPrice": 3842.10,
+      "changePct": -4.20,
+      "regime": "bearish",
+      "agreement": "aligned"
+    },
+    {
+      "symbol": "INFY",
+      "latestPrice": 1624.55,
+      "changePct": -2.10,
+      "regime": "bearish",
+      "agreement": "diverging"
+    },
+    {
+      "symbol": "RELIANCE",
+      "latestPrice": 2987.40,
+      "changePct": 3.60,
+      "regime": "bullish",
+      "agreement": "aligned"
+    },
+    {
+      "symbol": "HDFCBANK",
+      "latestPrice": 1712.85,
+      "changePct": -0.80,
+      "regime": "bearish",
+      "agreement": "aligned"
+    },
+    {
+      "symbol": "NIFTYBANK",
+      "latestPrice": 56470.65,
+      "changePct": -1.43,
+      "regime": "bearish",
+      "agreement": "insufficient"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "bullishCount": 18,
+  "bearishCount": 24,
+  "neutralCount": 8,
+  "dialLabel": "Bearish Lean",
+  "dialScore": 42.0,
+  "shortTerm": {
+    "days": 5,
+    "sign": "bearish",
+    "returnPct": -1.85
+  },
+  "mediumTerm": {
+    "days": 20,
+    "sign": "bearish",
+    "returnPct": -3.12
+  },
+  "longTerm": {
+    "days": 60,
+    "sign": "bullish",
+    "returnPct": 4.65
+  }
+}

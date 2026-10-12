@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MarketMind — Research Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #E7E9DE;
+    --paper-inset: #FAFAF7;
+    --ink: #1B2B22;
+    --ink-soft: #4B5A50;
+    --rule: #C6CBBC;
+    --loss: #8B2E1F;
+    --gain: #1F4E3D;
+    --brass: #A8823C;
+    --brass-soft: #E9DCC1;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:15px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:840px;margin:0 auto;padding:0 28px 100px;}
+
+  /* header */
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    flex-wrap:wrap;
+    padding:36px 0 20px;
+    border-bottom:1px solid var(--rule);
+  }
+  .brand{
+    font-family:'Fraunces',serif;
+    font-size:22px;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    margin-right:16px;
+  }
+  .brand span{color:var(--brass);}
+  nav{display:flex;font-size:13px;color:var(--ink-soft);}
+  nav a{color:inherit;text-decoration:none;border-bottom:1px solid transparent;cursor:pointer;margin-left:22px;}
+  nav a:first-child{margin-left:0;}
+  nav a:hover{border-bottom-color:var(--ink-soft);}
+
+  /* query desk */
+  .desk{padding:26px 0 8px;}
+  .desk-label{
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-bottom:10px;
+  }
+  .desk-label::before{content:"— ";}
+  .query-row{
+    display:flex;
+    border-bottom:2px solid var(--ink);
+    padding-bottom:10px;
+    align-items:baseline;
+    min-width:0;
+  }
+  .query-row input{
+    flex:1;
+    min-width:0;
+    border:none;
+    background:transparent;
+    outline:none;
+    font-family:'Fraunces',serif;
+    font-size:20px;
+    font-weight:400;
+    color:var(--ink);
+    padding:2px 0;
+  }
+  .query-row input::placeholder{color:#8C9187;font-style:italic;}
+  .query-row button{
+    flex-shrink:0;
+    border:none;
+    background:none;
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink);
+    cursor:pointer;
+    padding:6px 0 6px 10px;
+    white-space:nowrap;
+  }
+  .query-row button:hover{color:var(--brass);}
+  .chips{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+  .chip{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    border:1px solid var(--rule);
+    padding:5px 12px;
+    border-radius:2px;
+    cursor:pointer;
+    background:var(--paper-inset);
+  }
+  .chip:hover{border-color:var(--ink);color:var(--ink);}
+  .chip.active{border-color:var(--ink);color:var(--ink);background:var(--brass-soft);}
+
+  .empty-note{
+    margin-top:16px;
+    font-size:13px;
+    font-style:italic;
+    color:var(--ink-soft);
+    display:none;
+  }
+
+  /* result dossier */
+  #dossier{margin-top:38px;}
+  .case-no{font-size:11.5px;color:var(--ink-soft);letter-spacing:.02em;margin-bottom:6px;}
+
+  .headline{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:14px 24px;
+    padding-bottom:20px;
+  }
+  .name-block .ticker{
+    font-family:'Fraunces',serif;
+    font-size:38px;
+    font-weight:500;
+    line-height:1;
+    letter-spacing:-0.01em;
+  }
+  .name-block .full-name{font-size:13px;color:var(--ink-soft);margin-top:4px;}
+  .price-block{text-align:right;}
+  .price-block .price{
+    font-family:'Fraunces',serif;
+    font-size:30px;
+    font-weight:500;
+    font-variant-numeric:tabular-nums;
+  }
+  .price-block .change{
+    font-size:14.5px;
+    font-weight:600;
+    margin-top:2px;
+    position:relative;
+    display:inline-block;
+  }
+  .change.loss{color:var(--loss);}
+  .change.gain{color:var(--gain);}
+  .change::after{
+    content:"";
+    position:absolute;
+    left:0;bottom:-3px;
+    height:2px;
+    width:0%;
+    background:currentColor;
+    animation:draw 900ms 300ms ease forwards;
+  }
+  @keyframes draw{to{width:100%;}}
+
+  .chart-row{
+    border-top:1px solid var(--rule);
+    border-bottom:1px solid var(--rule);
+    padding:16px 0;
+    margin-bottom:26px;
+  }
+  .chart-row svg{width:100%;height:80px;display:block;}
+
+  /* ledger three-column */
+  .ledger{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    border-top:1px solid var(--ink);
+    border-bottom:1px solid var(--rule);
+    margin-bottom:30px;
+  }
+  .ledger-col{
+    padding:16px 18px;
+    border-right:1px solid var(--rule);
+  }
+  .ledger-col:last-child{border-right:none;}
+  .ledger-col .col-label{
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  .ledger-col .col-value{
+    font-family:'Fraunces',serif;
+    font-size:19px;
+    font-weight:500;
+  }
+  .col-value.loss{color:var(--loss);}
+  .col-value.gain{color:var(--gain);}
+  .col-sub{font-size:12px;color:var(--ink-soft);margin-top:4px;}
+
+  .meter{
+    margin-top:10px;
+    height:5px;
+    background:#DADCCF;
+    border-radius:3px;
+    overflow:hidden;
+    position:relative;
+  }
+  .meter-fill{
+    height:100%;
+    background:var(--brass);
+    width:0%;
+    border-radius:3px;
+    animation:fill 1100ms 500ms cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  @keyframes fill{to{width:var(--target);}}
+
+  .badge{
+    display:inline-block;
+    font-size:12px;
+    font-weight:600;
+    padding:3px 9px;
+    border-radius:2px;
+  }
+  .badge.aligned{background:#DCE9E2;color:var(--gain);}
+  .badge.diverging{background:#F1DCD5;color:var(--loss);}
+
+  /* explanation */
+  .explain-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:12px;
+  }
+  .explain-head h2{
+    font-family:'Fraunces',serif;
+    font-size:19px;
+    font-weight:500;
+    margin:0;
+  }
+  .confidence{font-size:12px;color:var(--ink-soft);}
+  .confidence b{color:var(--ink);}
+  .explain-body{
+    font-size:14.5px;
+    color:var(--ink);
+    padding-bottom:8px;
+  }
+  .explain-body sup{
+    font-size:10px;
+    color:var(--brass);
+    font-weight:700;
+    margin-left:1px;
+  }
+  .footnotes{
+    margin-top:16px;
+    padding-top:14px;
+    border-top:1px dashed var(--rule);
+  }
+  .footnote{
+    display:flex;
+    gap:10px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  .footnote .fn-num{color:var(--brass);font-weight:700;min-width:14px;}
+  .footnote a{color:var(--ink-soft);}
+
+  /* similar instances */
+  .section-label{
+    font-size:11px;
+    color:var(--ink-soft);
+    margin:34px 0 12px;
+  }
+  .section-label::before{content:"— ";}
+  table.instances{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13.5px;
+  }
+  table.instances th{
+    text-align:left;
+    font-size:11px;
+    font-weight:600;
+    color:var(--ink-soft);
+    border-bottom:1px solid var(--ink);
+    padding:0 10px 8px 0;
+  }
+  table.instances td{
+    padding:10px 10px 10px 0;
+    border-bottom:1px solid var(--rule);
+  }
+  table.instances tr:last-child td{border-bottom:none;}
+  .rec-yes{color:var(--gain);font-weight:600;}
+  .rec-no{color:var(--loss);font-weight:600;}
+
+  footer{
+    margin-top:50px;
+    padding-top:18px;
+    border-top:1px solid var(--rule);
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+
+  @media (max-width:600px){
+    .ledger{grid-template-columns:1fr;}
+    .ledger-col{border-right:none;border-bottom:1px solid var(--rule);}
+    .price-block{text-align:left;}
+    .headline{align-items:flex-start;}
+    header{padding:26px 0 16px;}
+    nav{width:100%;margin-top:10px;}
+    nav a:first-child{margin-left:0;}
+    .query-row input{font-size:17px;}
+    table.instances{font-size:12.5px;}
+    table.instances td, table.instances th{padding-right:6px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .change::after{animation:none;width:100%;}
+    .meter-fill{animation:none;width:var(--target);}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">Market<span>Mind</span></div>
+    <nav>
+      <a>Watchlist</a>
+      <a>Sector view</a>
+      <a>History</a>
+    </nav>
+  </header>
+
+  <div class="desk">
+    <div class="desk-label">research desk</div>
+    <div class="query-row">
+      <input id="queryInput" type="text" placeholder="why is TCS falling this week" />
+      <button onclick="runQuery()">Ask →</button>
+    </div>
+    <div class="chips">
+      <div class="chip active" data-symbol="TCS" onclick="selectChip(this,'TCS')">TCS</div>
+      <div class="chip" data-symbol="INFY" onclick="selectChip(this,'INFY')">Infosys</div>
+      <div class="chip" data-symbol="RELIANCE" onclick="selectChip(this,'RELIANCE')">Reliance</div>
+      <div class="chip" data-symbol="HDFCBANK" onclick="selectChip(this,'HDFCBANK')">HDFC Bank</div>
+    </div>
+    <div class="empty-note" id="emptyNote">Not in this dossier's tracked universe yet — try TCS, Infosys, Reliance, or HDFC Bank.</div>
+  </div>
+
+  <div id="dossier"></div>
+
+  <footer>
+    MarketMind is a research and explanation tool built on historical price and news data. It does not predict future prices and is not investment advice. Explanations are generated from retrieved sources and may be incomplete.
+  </footer>
+
+</div>
+
+<script>
+const DATA = {
+  TCS: {
+    name: "Tata Consultancy Services",
+    caseNo: "Dossier No. 0417 — 5 trading days",
+    price: "₹3,842.10",
+    change: "−4.2%",
+    changeDir: "loss",
+    spark: "M0,20 L20,26 L40,22 L60,32 L80,38 L100,44 L120,52 L140,58 L160,55 L180,64 L200,60 L220,68 L240,66 L260,70",
+    regime: "Bearish",
+    regimeDir: "loss",
+    regimeSub: "z-score −2.6 · 60-day window",
+    sentiment: "Bearish (68%)",
+    sentimentDir: "loss",
+    sentimentSub: "41 articles scanned, 5-day window",
+    agreement: "Aligned",
+    agreementClass: "aligned",
+    agreementFill: "82%",
+    agreementSub: "Price and sentiment point the same way",
+    confidence: "High",
+    explanation: "Global IT spending pullback among key overseas clients<sup>1</sup> appears to be the primary driver, compounded by reported budget freezes at two large North American accounts<sup>2</sup>. The move is broadly sector-wide rather than company-specific — Nifty IT fell 3.1% over the same window<sup>3</sup>, suggesting macro conditions rather than a company-specific shock.",
+    footnotes: [
+      "Economic Times — \"IT majors flag slower discretionary tech spend for FY27\" · 4 days ago",
+      "Moneycontrol — \"TCS North America clients delay renewals amid budget review\" · 3 days ago",
+      "NSE Indices — Nifty IT sector index, 5-day performance"
+    ],
+    instances: [
+      ["Mar 2023", "Similar bearish regime + negative sentiment", "Recovered in 12 sessions", "yes"],
+      ["Oct 2022", "Similar bearish regime + neutral sentiment", "Continued decline 6 more sessions", "no"],
+      ["Jun 2021", "Similar bearish regime + negative sentiment", "Recovered in 8 sessions", "yes"],
+    ]
+  },
+  INFY: {
+    name: "Infosys Limited",
+    caseNo: "Dossier No. 0418 — 5 trading days",
+    price: "₹1,624.55",
+    change: "−2.1%",
+    changeDir: "loss",
+    spark: "M0,24 L20,26 L40,24 L60,28 L80,30 L100,34 L120,36 L140,34 L160,38 L180,40 L200,38 L220,42 L240,40 L260,44",
+    regime: "Bearish",
+    regimeDir: "loss",
+    regimeSub: "z-score −1.8 · 60-day window",
+    sentiment: "Neutral (52%)",
+    sentimentDir: "loss",
+    sentimentSub: "29 articles scanned, 5-day window",
+    agreement: "Diverging",
+    agreementClass: "diverging",
+    agreementFill: "34%",
+    agreementSub: "No strong negative narrative found in news",
+    confidence: "Low",
+    explanation: "Price fell despite no clearly negative sentiment in retrieved coverage over the same window. Available articles were largely neutral, discussing routine quarterly guidance<sup>1</sup> without significant new information. This move may reflect index rebalancing or institutional flows not captured in our news corpus — treat this explanation as inconclusive.",
+    footnotes: [
+      "Business Standard — \"Infosys reiterates FY27 guidance, no major changes\" · 2 days ago"
+    ],
+    instances: [
+      ["Jan 2024", "Similar divergence pattern", "Recovered within 5 sessions", "yes"],
+      ["Aug 2023", "Similar divergence pattern", "Flat for 2 weeks, then recovered", "yes"],
+    ]
+  },
+  RELIANCE: {
+    name: "Reliance Industries",
+    caseNo: "Dossier No. 0419 — 5 trading days",
+    price: "₹2,987.40",
+    change: "+3.6%",
+    changeDir: "gain",
+    spark: "M0,60 L20,55 L40,58 L60,48 L80,44 L100,38 L120,34 L140,30 L160,26 L180,28 L200,20 L220,18 L240,14 L260,10",
+    regime: "Bullish",
+    regimeDir: "gain",
+    regimeSub: "z-score +2.1 · 60-day window",
+    sentiment: "Bullish (71%)",
+    sentimentDir: "gain",
+    sentimentSub: "36 articles scanned, 5-day window",
+    agreement: "Aligned",
+    agreementClass: "aligned",
+    agreementFill: "88%",
+    agreementSub: "Price and sentiment point the same way",
+    confidence: "High",
+    explanation: "Reported progress on the new energy and retail demerger timeline<sup>1</sup> combined with stronger-than-expected refining margins<sup>2</sup> appear to be driving the rally. Coverage sentiment turned positive in the days immediately preceding the move, consistent with the price action.",
+    footnotes: [
+      "Livemint — \"Reliance new energy vertical demerger timeline advances\" · 3 days ago",
+      "CNBC-TV18 — \"RIL refining margins beat estimates in Q2 update\" · 2 days ago"
+    ],
+    instances: [
+      ["Feb 2023", "Similar bullish regime + positive sentiment", "Continued rally 3 more weeks", "yes"],
+      ["Nov 2021", "Similar bullish regime + positive sentiment", "Gave back gains within 10 sessions", "no"],
+    ]
+  },
+  HDFCBANK: {
+    name: "HDFC Bank",
+    caseNo: "Dossier No. 0420 — 5 trading days",
+    price: "₹1,712.85",
+    change: "−0.8%",
+    changeDir: "loss",
+    spark: "M0,30 L20,32 L40,30 L60,31 L80,33 L100,32 L120,34 L140,33 L160,35 L180,34 L200,36 L220,35 L240,37 L260,36",
+    regime: "Consolidating",
+    regimeDir: "loss",
+    regimeSub: "z-score −0.6 · 60-day window",
+    sentiment: "Neutral (55%)",
+    sentimentDir: "loss",
+    sentimentSub: "22 articles scanned, 5-day window",
+    agreement: "Insufficient signal",
+    agreementClass: "diverging",
+    agreementFill: "18%",
+    agreementSub: "Move too small to be statistically notable",
+    confidence: "Low",
+    explanation: "This move falls within normal trading noise for HDFC Bank (z-score −0.6) and does not meet our anomaly threshold. No dossier is generated for moves this small — the underlying data is shown for reference only.",
+    footnotes: [],
+    instances: []
+  }
+};
+
+function sparkSvg(d, dir){
+  const color = dir === "loss" ? "var(--loss)" : "var(--gain)";
+  return `<svg viewBox="0 0 260 80" preserveAspectRatio="none">
+    <path d="${d}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+function render(symbol){
+  const d = DATA[symbol];
+  const el = document.getElementById('dossier');
+
+  let bodyHtml = `
+    <div class="case-no">${d.caseNo}</div>
+    <div class="headline">
+      <div class="name-block">
+        <div class="ticker">${symbol}</div>
+        <div class="full-name">${d.name}</div>
+      </div>
+      <div class="price-block">
+        <div class="price">${d.price}</div>
+        <div class="change ${d.changeDir}" key="${symbol}">${d.change} (5d)</div>
+      </div>
+    </div>
+    <div class="chart-row">${sparkSvg(d.spark, d.changeDir)}</div>
+
+    <div class="ledger">
+      <div class="ledger-col">
+        <div class="col-label">Price regime</div>
+        <div class="col-value ${d.regimeDir}">${d.regime}</div>
+        <div class="col-sub">${d.regimeSub}</div>
+      </div>
+      <div class="ledger-col">
+        <div class="col-label">Market sentiment</div>
+        <div class="col-value ${d.sentimentDir}">${d.sentiment}</div>
+        <div class="col-sub">${d.sentimentSub}</div>
+      </div>
+      <div class="ledger-col">
+        <div class="col-label">Signal agreement</div>
+        <span class="badge ${d.agreementClass}">${d.agreement}</span>
+        <div class="meter"><div class="meter-fill" style="--target:${d.agreementFill}"></div></div>
+        <div class="col-sub">${d.agreementSub}</div>
+      </div>
+    </div>
+  `;
+
+  if(d.footnotes.length){
+    bodyHtml += `
+      <div class="explain-head">
+        <h2>Why it's moving</h2>
+        <div class="confidence">Confidence: <b>${d.confidence}</b></div>
+      </div>
+      <div class="explain-body">${d.explanation}</div>
+      <div class="footnotes">
+        ${d.footnotes.map((f,i)=>`<div class="footnote"><span class="fn-num">${i+1}</span><span>${f}</span></div>`).join('')}
+      </div>
+    `;
+  } else {
+    bodyHtml += `
+      <div class="explain-head"><h2>Why it's moving</h2></div>
+      <div class="explain-body">${d.explanation}</div>
+    `;
+  }
+
+  if(d.instances.length){
+    bodyHtml += `
+      <div class="section-label">similar past instances</div>
+      <table class="instances">
+        <tr><th>When</th><th>Pattern</th><th>What happened next</th><th></th></tr>
+        ${d.instances.map(row => `
+          <tr>
+            <td>${row[0]}</td>
+            <td>${row[1]}</td>
+            <td>${row[2]}</td>
+            <td class="${row[3]==='yes' ? 'rec-yes' : 'rec-no'}">${row[3]==='yes' ? 'Recovered' : 'Did not recover'}</td>
+          </tr>
+        `).join('')}
+      </table>
+    `;
+  }
+
+  el.innerHTML = bodyHtml;
+}
+
+function selectChip(node, symbol){
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  node.classList.add('active');
+  document.getElementById('emptyNote').style.display = 'none';
+  document.getElementById('queryInput').value = '';
+  document.getElementById('queryInput').placeholder = `why is ${symbol} moving`;
+  render(symbol);
+}
+
+function runQuery(){
+  const val = document.getElementById('queryInput').value.trim().toUpperCase();
+  const match = Object.keys(DATA).find(sym => val.includes(sym));
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  if(match){
+    document.getElementById('emptyNote').style.display = 'none';
+    document.querySelector(`.chip[data-symbol="${match}"]`).classList.add('active');
+    render(match);
+  } else if(val.length){
+    document.getElementById('emptyNote').style.display = 'block';
+  }
+}
+
+document.getElementById('queryInput').addEventListener('keydown', e => {
+  if(e.key === 'Enter') runQuery();
+});
+
+render('TCS');
+</script>
+</body>
+</html>

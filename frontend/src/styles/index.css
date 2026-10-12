@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --paper: #E7E9DE;
+  --paper-inset: #FAFAF7;
+  --ink: #1B2B22;
+  --ink-soft: #4B5A50;
+  --rule: #C6CBBC;
+  --loss: #8B2E1F;
+  --gain: #1F4E3D;
+  --brass: #A8823C;
+  --brass-soft: #E9DCC1;
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Price underline animation */
+.change-draw {
+  position: relative;
+  display: inline-block;
+}
+.change-draw::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  height: 2px;
+  width: 0%;
+  background: currentColor;
+  animation: drawLine 900ms 300ms ease forwards;
+}
+
+@keyframes drawLine {
+  to {
+    width: 100%;
+  }
+}
+
+/* Agreement meter animation */
+.meter-fill-anim {
+  animation: fillMeter 1100ms 400ms cubic-bezier(.2, .8, .2, 1) forwards;
+}
+
+@keyframes fillMeter {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--meter-target, 70%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .change-draw::after {
+    animation: none;
+    width: 100%;
+  }
+  .meter-fill-anim {
+    animation: none;
+    width: var(--meter-target, 70%);
+  }
+}
+
+/* Print Stylesheet for one-page dossier export */
+@media print {
+  header, nav, .desk, .non-printable, .banner, button {
+    display: none !important;
+  }
+  body, .wrap {
+    background: #ffffff !important;
+    color: #000000 !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+  .print-page {
+    page-break-inside: avoid;
+  }
+}

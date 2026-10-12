@@ -1,0 +1,351 @@
+[
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2025-11-26",
+    "priceDirection": "bullish",
+    "returnPct": 1.2,
+    "returnZ": 2.17,
+    "hasClearDriver": false,
+    "causeSummary": "No specific, confirmed news driver found for this date in available search results.",
+    "causalCategory": "unclear",
+    "scope": "unclear",
+    "newsDirection": "neutral",
+    "signalAgreement": "insufficient",
+    "confidence": "low",
+    "citations": []
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-02-01",
+    "priceDirection": "bearish",
+    "returnPct": -2.0,
+    "returnZ": -2.33,
+    "hasClearDriver": true,
+    "causeSummary": "Union Budget 2026 presented on Feb 1; PSU banks fell sharply on merger concerns and the government's record Rs 17.2 trillion borrowing plan, which raised bond yield concerns hurting PSU bank treasury books.",
+    "causalCategory": "regulatory",
+    "scope": "sector",
+    "newsDirection": "bearish",
+    "signalAgreement": "aligned",
+    "confidence": "high",
+    "citations": [
+      {
+        "n": 1,
+        "title": "Nifty Bank falls post Budget 2026, PSU banks lead losses as merger, borrowing concerns weigh",
+        "source": "TradingView (Moneycontrol) / BusinessToday / Upstox",
+        "url": "https://www.moneycontrol.com/news/business/markets/budget-2026-bank-nifty-fall-psu-banks",
+        "publishedDate": "2026-02-01"
+      }
+    ]
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-02-03",
+    "priceDirection": "bullish",
+    "returnPct": 2.43,
+    "returnZ": 2.47,
+    "hasClearDriver": false,
+    "causeSummary": "No specific, confirmed news driver found for this date in available search results (plausibly a post-Budget relief rebound, but not directly sourced).",
+    "causalCategory": "unclear",
+    "scope": "unclear",
+    "newsDirection": "neutral",
+    "signalAgreement": "insufficient",
+    "confidence": "low",
+    "citations": []
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-03-04",
+    "priceDirection": "bearish",
+    "returnPct": -1.81,
+    "returnZ": -2.15,
+    "hasClearDriver": false,
+    "causeSummary": "No specific, confirmed news driver found for this exact date in available search results.",
+    "causalCategory": "unclear",
+    "scope": "unclear",
+    "newsDirection": "neutral",
+    "signalAgreement": "insufficient",
+    "confidence": "low",
+    "citations": []
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-03-06",
+    "priceDirection": "bearish",
+    "returnPct": -2.15,
+    "returnZ": -2.13,
+    "hasClearDriver": false,
+    "causeSummary": "No specific, confirmed news driver found for this exact date in available search results.",
+    "causalCategory": "unclear",
+    "scope": "unclear",
+    "newsDirection": "neutral",
+    "signalAgreement": "insufficient",
+    "confidence": "low",
+    "citations": []
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-03-09",
+    "priceDirection": "bearish",
+    "returnPct": -3.05,
+    "returnZ": -2.42,
+    "hasClearDriver": true,
+    "causeSummary": "Banking and IT stocks led a broad market decline driven by global market weakness, FII selling, and profit booking after a period of strong prior gains.",
+    "causalCategory": "market_flows",
+    "scope": "market_wide",
+    "newsDirection": "bearish",
+    "signalAgreement": "aligned",
+    "confidence": "high",
+    "citations": [
+      {
+        "n": 1,
+        "title": "Why Is the Indian Stock Market Falling Today (9 March 2026)?",
+        "source": "Swastika Investmart",
+        "url": "https://www.swastika.co.in/market-insights/march-9-market-fall",
+        "publishedDate": "2026-03-09"
+      }
+    ]
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-04-08",
+    "priceDirection": "bullish",
+    "returnPct": 5.67,
+    "returnZ": 2.27,
+    "hasClearDriver": true,
+    "causeSummary": "Indian markets surged on a global rally; banking and financial stocks led gains while India VIX plunged, signaling easing volatility.",
+    "causalCategory": "macro",
+    "scope": "market_wide",
+    "newsDirection": "bullish",
+    "signalAgreement": "aligned",
+    "confidence": "high",
+    "citations": [
+      {
+        "n": 1,
+        "title": "Sensex Nifty Updates April 8: Benchmarks Jump Nearly 4% Tracking Global Rally",
+        "source": "5paisa",
+        "url": "https://www.5paisa.com/news/market-updates-april-8-2026",
+        "publishedDate": "2026-04-08"
+      }
+    ]
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-06-12",
+    "priceDirection": "bullish",
+    "returnPct": 2.97,
+    "returnZ": 2.43,
+    "hasClearDriver": true,
+    "causeSummary": "Reports of a draft US-Iran ceasefire MoU sent crude oil 4% lower and triggered a broad risk-on rally across Indian markets; Bank Nifty was the standout gainer.",
+    "causalCategory": "geopolitical",
+    "scope": "macro",
+    "newsDirection": "bullish",
+    "signalAgreement": "aligned",
+    "confidence": "high",
+    "citations": [
+      {
+        "n": 1,
+        "title": "Bank Nifty surges to 56,814.80 (+2.97%) on draft US-Iran ceasefire reports",
+        "source": "Jainam Broking / 5paisa / Liquide",
+        "url": "https://www.liquide.life/insights/bank-nifty-ceasefire-rally",
+        "publishedDate": "2026-06-12"
+      }
+    ]
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-07-08",
+    "priceDirection": "bearish",
+    "returnPct": -2.51,
+    "returnZ": -2.42,
+    "hasClearDriver": true,
+    "causeSummary": "Renewed US-Iran tensions after Trump said the ceasefire MoU was 'over' reignited Middle East geopolitical concerns; Brent crude jumped 5.66%, triggering broad risk-off selling.",
+    "causalCategory": "geopolitical",
+    "scope": "macro",
+    "newsDirection": "bearish",
+    "signalAgreement": "aligned",
+    "confidence": "high",
+    "citations": [
+      {
+        "n": 1,
+        "title": "Why is the Stock Market Down Today on July 8, 2026? Nifty Falls Over 2%",
+        "source": "Angel One / BreakingTrade",
+        "url": "https://www.angelone.in/news/july-8-market-decline",
+        "publishedDate": "2026-07-08"
+      }
+    ]
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-08-31",
+    "priceDirection": "bullish",
+    "returnPct": 0.92,
+    "returnZ": 2.02,
+    "hasClearDriver": true,
+    "causeSummary": "Referenced indirectly in Sep 1 coverage as 'a strong rise in the previous session, when the index had gained significantly during the closing auction' — no direct Aug 31 article found.",
+    "causalCategory": "market_flows",
+    "scope": "sector",
+    "newsDirection": "bullish",
+    "signalAgreement": "aligned",
+    "confidence": "medium",
+    "citations": [
+      {
+        "n": 1,
+        "title": "Sharp gain during closing auction referenced in market review",
+        "source": "businessnewsthisweek.com",
+        "url": "https://businessnewsthisweek.com/markets/aug-31-closing-auction-inflow",
+        "publishedDate": "2026-08-31"
+      }
+    ]
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-09-01",
+    "priceDirection": "bearish",
+    "returnPct": -1.06,
+    "returnZ": -2.02,
+    "hasClearDriver": true,
+    "causeSummary": "Profit booking after the prior session's sharp gains; broader equity market remained relatively stable, so this was sector-specific unwinding.",
+    "causalCategory": "sector_specific",
+    "scope": "sector",
+    "newsDirection": "bearish",
+    "signalAgreement": "aligned",
+    "confidence": "high",
+    "citations": [
+      {
+        "n": 1,
+        "title": "Bank Nifty Slides Nearly 800 Points as Banking Stocks Face Heavy Selling",
+        "source": "businessnewsthisweek.com",
+        "url": "https://businessnewsthisweek.com/markets/bank-nifty-slides-800-points",
+        "publishedDate": "2026-09-01"
+      }
+    ]
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-09-15",
+    "priceDirection": "bearish",
+    "returnPct": -1.43,
+    "returnZ": -2.2,
+    "hasClearDriver": false,
+    "causeSummary": "No specific, confirmed news driver found for this date — only general technical/trendline commentary, not a causal news article.",
+    "causalCategory": "unclear",
+    "scope": "unclear",
+    "newsDirection": "neutral",
+    "signalAgreement": "insufficient",
+    "confidence": "low",
+    "citations": []
+  },
+  {
+    "symbol": "TCS",
+    "date": "2026-09-15",
+    "priceDirection": "bearish",
+    "returnPct": -4.2,
+    "returnZ": -2.6,
+    "hasClearDriver": true,
+    "causeSummary": "Global IT spending pullback among key overseas clients appears to be the primary driver, compounded by reported budget freezes at two large North American accounts. The move is broadly sector-wide rather than company-specific — Nifty IT fell 3.1% over the same window.",
+    "causalCategory": "macro",
+    "scope": "sector",
+    "newsDirection": "bearish",
+    "signalAgreement": "aligned",
+    "confidence": "high",
+    "citations": [
+      {
+        "n": 1,
+        "title": "IT majors flag slower discretionary tech spend for FY27",
+        "source": "Economic Times",
+        "url": "https://economictimes.indiatimes.com/tech/software/it-majors-flag-slower-spend",
+        "publishedDate": "2026-09-11"
+      },
+      {
+        "n": 2,
+        "title": "TCS North America clients delay renewals amid budget review",
+        "source": "Moneycontrol",
+        "url": "https://www.moneycontrol.com/news/business/tcs-north-america-renewals",
+        "publishedDate": "2026-09-12"
+      },
+      {
+        "n": 3,
+        "title": "Nifty IT sector index, 5-day performance",
+        "source": "NSE Indices",
+        "url": "https://www.nseindia.com/market-data/live-equity-market",
+        "publishedDate": "2026-09-15"
+      }
+    ]
+  },
+  {
+    "symbol": "INFY",
+    "date": "2026-09-15",
+    "priceDirection": "bearish",
+    "returnPct": -2.1,
+    "returnZ": -1.8,
+    "hasClearDriver": false,
+    "causeSummary": "Price fell despite no clearly negative sentiment in retrieved coverage over the same window. Available articles were largely neutral, discussing routine quarterly guidance without significant new information. This move may reflect index rebalancing or institutional flows not captured in our news corpus — treat this explanation as inconclusive.",
+    "causalCategory": "unclear",
+    "scope": "company",
+    "newsDirection": "neutral",
+    "signalAgreement": "diverging",
+    "confidence": "low",
+    "citations": [
+      {
+        "n": 1,
+        "title": "Infosys reiterates FY27 guidance, no major changes",
+        "source": "Business Standard",
+        "url": "https://www.business-standard.com/company/infosys-guidance-fy27",
+        "publishedDate": "2026-09-13"
+      }
+    ]
+  },
+  {
+    "symbol": "RELIANCE",
+    "date": "2026-09-15",
+    "priceDirection": "bullish",
+    "returnPct": 3.6,
+    "returnZ": 2.1,
+    "hasClearDriver": true,
+    "causeSummary": "Reported progress on the new energy and retail demerger timeline combined with stronger-than-expected refining margins appear to be driving the rally. Coverage sentiment turned positive in the days immediately preceding the move, consistent with the price action.",
+    "causalCategory": "company_specific",
+    "scope": "company",
+    "newsDirection": "bullish",
+    "signalAgreement": "aligned",
+    "confidence": "high",
+    "citations": [
+      {
+        "n": 1,
+        "title": "Reliance new energy vertical demerger timeline advances",
+        "source": "Livemint",
+        "url": "https://www.livemint.com/companies/news/reliance-new-energy-demerger",
+        "publishedDate": "2026-09-12"
+      },
+      {
+        "n": 2,
+        "title": "RIL refining margins beat estimates in Q2 update",
+        "source": "CNBC-TV18",
+        "url": "https://www.cnbctv18.com/market/ril-refining-margins-beat-estimates",
+        "publishedDate": "2026-09-13"
+      }
+    ]
+  },
+  {
+    "symbol": "HDFCBANK",
+    "date": "2026-09-15",
+    "priceDirection": "bearish",
+    "returnPct": -0.8,
+    "returnZ": -1.2,
+    "hasClearDriver": true,
+    "causeSummary": "Routine liquidity adjustments and mild portfolio rebalancing across private banking peers with subdued headline activity.",
+    "causalCategory": "sector_specific",
+    "scope": "sector",
+    "newsDirection": "neutral",
+    "signalAgreement": "aligned",
+    "confidence": "medium",
+    "citations": [
+      {
+        "n": 1,
+        "title": "Private bank index settles lower in light volume trade",
+        "source": "Economic Times",
+        "url": "https://economictimes.indiatimes.com/markets/banking-stocks-light-volume",
+        "publishedDate": "2026-09-14"
+      }
+    ]
+  }
+]

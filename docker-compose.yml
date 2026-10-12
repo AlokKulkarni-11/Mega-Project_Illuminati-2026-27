@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: marketmind-postgres
+    environment:
+      POSTGRES_DB: marketmind
+      POSTGRES_USER: marketmind_user
+      POSTGRES_PASSWORD: marketmind_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U marketmind_user -d marketmind"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: marketmind-backend
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/marketmind
+      DB_USER: marketmind_user
+      DB_PASSWORD: marketmind_password
+      JWT_SECRET: 4f8b92c1e7a3d6f08152b49c3e7a1d5f80b2c4e6a8d0f2a4c6e8b0d2f4a6c8e0
+      CORS_ORIGINS: http://localhost:5173,http://localhost:3000
+      ENGINE_MODE: mock
+      ENGINE_BASE_URL: http://localhost:8000
+      MARKETMIND_ENGINE_SCHEMA_ENABLED: "false"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: marketmind-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

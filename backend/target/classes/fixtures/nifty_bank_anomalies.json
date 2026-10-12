@@ -1,0 +1,110 @@
+[
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2025-11-26",
+    "direction": "bullish",
+    "returnPct": 1.2,
+    "returnZ": 2.17,
+    "label": "Bullish Rebound",
+    "confidence": "unconfirmed"
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-02-01",
+    "direction": "bearish",
+    "returnPct": -2.0,
+    "returnZ": -2.33,
+    "label": "Budget Shock & PSU Selloff",
+    "confidence": "high"
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-02-03",
+    "direction": "bullish",
+    "returnPct": 2.43,
+    "returnZ": 2.47,
+    "label": "Post-Budget Relief",
+    "confidence": "unconfirmed"
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-03-04",
+    "direction": "bearish",
+    "returnPct": -1.81,
+    "returnZ": -2.15,
+    "label": "Rate Cut Hesitation",
+    "confidence": "unconfirmed"
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-03-06",
+    "direction": "bearish",
+    "returnPct": -2.15,
+    "returnZ": -2.13,
+    "label": "Pre-Weekend De-risking",
+    "confidence": "unconfirmed"
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-03-09",
+    "direction": "bearish",
+    "returnPct": -3.05,
+    "returnZ": -2.42,
+    "label": "Global Spillover & FII Outflows",
+    "confidence": "high"
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-04-08",
+    "direction": "bullish",
+    "returnPct": 5.67,
+    "returnZ": 2.27,
+    "label": "Global Risk-on Surge",
+    "confidence": "high"
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-06-12",
+    "direction": "bullish",
+    "returnPct": 2.97,
+    "returnZ": 2.43,
+    "label": "Ceasefire MoU & Crude Drop",
+    "confidence": "high"
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-07-08",
+    "direction": "bearish",
+    "returnPct": -2.51,
+    "returnZ": -2.42,
+    "label": "Geopolitical Flare & Crude Surge",
+    "confidence": "high"
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-08-31",
+    "direction": "bullish",
+    "returnPct": 0.92,
+    "returnZ": 2.02,
+    "label": "Auction Surge Inflow",
+    "confidence": "medium"
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-09-01",
+    "direction": "bearish",
+    "returnPct": -1.06,
+    "returnZ": -2.02,
+    "label": "Sector Unwinding & Profit Booking",
+    "confidence": "high"
+  },
+  {
+    "symbol": "NIFTYBANK",
+    "date": "2026-09-15",
+    "direction": "bearish",
+    "returnPct": -1.43,
+    "returnZ": -2.2,
+    "label": "Technical Breakdown",
+    "confidence": "unconfirmed"
+  }
+]

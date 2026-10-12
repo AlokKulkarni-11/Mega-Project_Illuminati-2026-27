@@ -1,0 +1,16 @@
+text,sentiment,causal_category
+"TCS reported weaker-than-expected quarterly revenue as clients delayed IT spending amid a slowing global economy.",bearish,earnings
+"RBI raises repo rate by 25 bps citing persistent inflation concerns, third hike this year.",bearish,macro
+"Reliance Industries announces new energy joint venture with Saudi Aramco, expanding green hydrogen capacity.",bullish,company_specific
+"Nifty IT index falls 3% as US clients signal broader tech budget freezes for FY27.",bearish,sector_specific
+"Government approves new PLI scheme for semiconductor manufacturing, boosting related stocks.",bullish,regulatory
+"Rising tensions in the Red Sea shipping routes raise concerns over crude oil supply chains.",bearish,geopolitical
+"HDFC Bank posts steady quarterly earnings in line with analyst expectations, no major surprises.",neutral,earnings
+"Infosys reiterates FY27 guidance, reaffirming prior growth targets with no major changes.",neutral,earnings
+"Adani Ports wins new container terminal contract, expected to boost cargo volumes significantly.",bullish,company_specific
+"Global chip shortage eases as major foundries report improved supply, benefiting Indian IT hardware importers.",bullish,macro
+"SEBI tightens disclosure norms for related-party transactions, raising compliance costs for listed firms.",bearish,regulatory
+"US Federal Reserve signals potential rate cuts later this year, boosting risk appetite in emerging markets.",bullish,macro
+"Maruti Suzuki reports flat sales for the month, broadly matching seasonal expectations.",neutral,company_specific
+"Escalating trade tensions between US and China raise concerns over global auto component supply chains.",bearish,geopolitical
+"Union Budget increases capital expenditure allocation for infrastructure, benefiting construction and cement stocks.",bullish,regulatory
