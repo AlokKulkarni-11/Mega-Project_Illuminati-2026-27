@@ -10,7 +10,7 @@ export const Banner: React.FC<BannerProps> = ({ engine }) => {
 
   if (engine.mode === 'mock') {
     return (
-      <aside aria-label="Engine Status" className="banner w-full bg-paper-inset border-b border-rule py-2 px-4 text-xs text-ink-soft flex items-center justify-between">
+      <aside aria-label="Engine Status" className="banner w-full bg-paper-inset border-b border-rule py-2 text-xs text-ink-soft flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <span className="inline-block w-2 h-2 rounded-full bg-brass" />
           <span className="font-medium text-ink">Sample data — engine not connected</span>
@@ -23,7 +23,7 @@ export const Banner: React.FC<BannerProps> = ({ engine }) => {
 
   if (!engine.enabled || engine.mode === 'disabled') {
     return (
-      <aside aria-label="Engine Status" className="banner w-full bg-paper-inset border-b border-rule py-2 px-4 text-xs text-ink-soft flex items-center justify-between">
+      <aside aria-label="Engine Status" className="banner w-full bg-paper-inset border-b border-rule py-2 text-xs text-ink-soft flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <span className="inline-block w-2 h-2 rounded-full bg-loss" />
           <span className="font-medium text-ink">Market intelligence engine not connected</span>

@@ -99,9 +99,9 @@ export const ComparisonPage: React.FC = () => {
                       <span
                         className={`px-2 py-0.5 text-[11px] font-semibold ${
                           row.agreement === 'aligned'
-                            ? 'bg-[#DCE9E2] text-gain'
+                            ? 'bg-[rgb(var(--c-tint))] text-gain'
                             : row.agreement === 'diverging'
-                            ? 'bg-[#F1DCD5] text-loss'
+                            ? 'bg-[rgb(var(--c-losstint))] text-loss'
                             : 'bg-paper-inset text-ink-soft border border-rule'
                         }`}
                       >

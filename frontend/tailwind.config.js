@@ -7,15 +7,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        paper: '#E7E9DE',
-        'paper-inset': '#FAFAF7',
-        ink: '#1B2B22',
-        'ink-soft': '#4B5A50',
-        rule: '#C6CBBC',
-        loss: '#8B2E1F',
-        gain: '#1F4E3D',
-        brass: '#A8823C',
-        'brass-soft': '#E9DCC1',
+        paper: 'rgb(var(--c-paper) / <alpha-value>)',
+        'paper-inset': 'rgb(var(--c-inset) / <alpha-value>)',
+        ink: 'rgb(var(--c-ink) / <alpha-value>)',
+        'ink-soft': 'rgb(var(--c-soft) / <alpha-value>)',
+        rule: 'rgb(var(--c-rule) / <alpha-value>)',
+        loss: 'rgb(var(--c-loss) / <alpha-value>)',
+        gain: 'rgb(var(--c-gain) / <alpha-value>)',
+        brass: 'rgb(var(--c-brass) / <alpha-value>)',
+        'brass-soft': 'rgb(var(--c-bs) / <alpha-value>)',
       },
       fontFamily: {
         serif: ['Fraunces', 'Georgia', 'serif'],

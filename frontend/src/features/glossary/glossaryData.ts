@@ -105,4 +105,10 @@ export const GLOSSARY_TERMS: Record<string, TermDefinition> = {
     definition: 'Broad institutional buying/selling pressure (FII/DII liquidity), index rebalancing, closing auction adjustments, or derivative expiry settlements.',
     category: 'engine',
   },
+  'confidence': { term: 'Confidence', definition: 'How well the cited news supports the stated cause. High means several dated sources agree; low means the evidence is thin.', category: 'engine' },
+  'anomaly': { term: 'Anomaly', definition: 'A day whose price move was unusually large for that instrument, measured by its z-score (|z| above 2).', category: 'statistics' },
+  'moving average': { term: 'Moving Average (SMA)', definition: 'The average closing price over the last N bars, drawn as a dashed line to smooth out day-to-day noise and show the trend.', category: 'statistics' },
+  'volume': { term: 'Volume', definition: 'How many shares or units traded in the period. Large moves on high volume tend to be more significant.', category: 'statistics' },
+  'candlestick': { term: 'Candlestick', definition: 'One bar showing open, high, low and close. The body spans open to close; the thin wick spans the high and low. Green closed up, red closed down.', category: 'statistics' },
+  'interval': { term: 'Interval', definition: 'How much time each bar covers: one day, one week or one month. Longer intervals show the bigger picture.', category: 'statistics' },
 };
