@@ -5,12 +5,13 @@ import { Capabilities } from '../types';
 
 interface TopBarProps {
   capabilities?: Capabilities;
+  /** Hide the section links (e.g. for signed-out visitors on the landing page). */
+  showNav?: boolean;
 }
 
-export const TopBar: React.FC<TopBarProps> = ({ capabilities }) => {
+export const TopBar: React.FC<TopBarProps> = ({ capabilities, showNav = true }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
-
   const isEngineEnabled = capabilities?.engine?.enabled ?? true;
 
   const navLinks = [
@@ -26,52 +27,42 @@ export const TopBar: React.FC<TopBarProps> = ({ capabilities }) => {
     { to: '/calculators', label: 'Calculators' },
     { to: '/glossary', label: 'Glossary' },
     { to: '/history', label: 'History' },
+    { to: '/settings', label: 'Settings' },
   ];
 
   return (
-    <header className="flex justify-between items-baseline flex-wrap pt-9 pb-5 border-b border-rule">
-      <div className="flex items-baseline space-x-6">
-        <Link to="/" className="font-serif text-2xl font-semibold tracking-tight text-ink hover:text-ink">
+    <header className="pt-6 border-b border-ink">
+      <div className="flex justify-between items-baseline flex-wrap gap-2">
+        <Link to="/" className="font-serif text-[22px] font-bold tracking-tight text-ink">
           Market<span className="text-brass">Mind</span>
         </Link>
-        <span className="text-xs text-ink-soft hidden sm:inline italic">research desk</span>
-      </div>
-
-      <nav className="flex items-center flex-wrap gap-x-5 gap-y-2 text-sm text-ink-soft mt-3 sm:mt-0">
-        {navLinks.map((link) => {
-          const isActive = location.pathname === link.to;
-          return (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`hover:text-ink transition-colors pb-0.5 ${
-                isActive ? 'text-ink border-b border-ink font-medium' : 'border-b border-transparent'
-              }`}
-            >
-              {link.label}
-            </Link>
-          );
-        })}
-
-        <div className="pl-4 border-l border-rule flex items-center space-x-3 text-xs">
+        <div className="text-[13px] flex items-center gap-4">
           {user ? (
             <>
-              <span className="text-ink font-medium">{user.fullName || user.email}</span>
-              <button
-                onClick={logout}
-                className="text-loss hover:underline cursor-pointer"
-              >
-                Sign out
-              </button>
+              <span className="text-ink-soft">{user.fullName || user.email}</span>
+              <button onClick={logout} className="text-ink-soft underline cursor-pointer hover:text-ink">Sign out</button>
             </>
           ) : (
             <>
-              <Link to="/login" className="hover:text-ink underline">Sign In</Link>
-              <Link to="/register" className="hover:text-ink underline">Register</Link>
+              <Link to="/login" className="text-ink-soft underline hover:text-ink">Sign in</Link>
+              <Link to="/register" className="bg-ink text-paper px-3 py-1.5">Create account</Link>
             </>
           )}
         </div>
-      </nav>
+      </div>
+      {showNav && (
+        <nav className="flex flex-wrap gap-x-[18px] gap-y-1 pt-2.5 pb-2 text-sm">
+          {navLinks.map((link) => {
+            const active = location.pathname === link.to;
+            return (
+              <Link key={link.to} to={link.to}
+                className={`pb-0.5 border-b-2 ${active ? 'text-ink border-ink' : 'text-ink-soft border-transparent hover:text-ink hover:border-ink'}`}>
+                {link.label}
+              </Link>
+            );
+          })}
+        </nav>
+      )}
     </header>
   );
 };

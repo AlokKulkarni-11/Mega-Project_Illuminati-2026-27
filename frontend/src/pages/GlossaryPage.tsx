@@ -35,7 +35,7 @@ export const GlossaryPage: React.FC = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search term or concept…"
-            className="w-full bg-transparent border-none outline-none font-serif text-base text-ink placeholder:italic placeholder:text-[#8C9187]"
+            className="w-full bg-transparent border-none outline-none font-serif text-base text-ink placeholder:italic placeholder:text-ink-soft"
           />
         </div>
 

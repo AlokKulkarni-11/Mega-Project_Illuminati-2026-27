@@ -3,6 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/Toast';
 
+
+const Field: React.FC<{ id: string; label: string; type?: string; value: string; onChange: (v: string) => void; autoComplete?: string }> = ({ id, label, type = 'text', value, onChange, autoComplete }) => (
+  <div className="my-[18px]">
+    <label htmlFor={id} className="block text-xs uppercase tracking-[.06em] text-ink-soft mb-0.5">{label}</label>
+    <input id={id} type={type} value={value} autoComplete={autoComplete} onChange={(e) => onChange(e.target.value)}
+      className="w-full bg-transparent border-0 border-b-2 border-ink py-1.5 text-[17px] text-ink outline-none focus:border-brass rounded-none" />
+  </div>
+);
+
 export const RegisterPage: React.FC = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -40,69 +49,21 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="register-page max-w-sm mx-auto pt-16">
-      <div className="border-b border-rule pb-3 mb-6">
-        <h1 className="font-serif text-3xl font-medium text-ink">Register Analyst</h1>
-        <p className="text-xs text-ink-soft mt-1">Open an active research case desk on MarketMind</p>
-      </div>
-
-      {errorMsg && (
-        <div className="p-3 bg-paper-inset border border-loss text-xs text-loss mb-6">
-          {errorMsg}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="border-b-2 border-ink pb-1">
-          <label className="block text-[11px] text-ink-soft uppercase font-mono mb-1">Full Name</label>
-          <input
-            type="text"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            placeholder="Jane Doe"
-            className="w-full bg-transparent border-none outline-none font-serif text-base text-ink placeholder:italic placeholder:text-[#8C9187]"
-          />
-        </div>
-
-        <div className="border-b-2 border-ink pb-1">
-          <label className="block text-[11px] text-ink-soft uppercase font-mono mb-1">Email Address</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="analyst@marketmind.app"
-            className="w-full bg-transparent border-none outline-none font-serif text-base text-ink placeholder:italic placeholder:text-[#8C9187]"
-            required
-          />
-        </div>
-
-        <div className="border-b-2 border-ink pb-1">
-          <label className="block text-[11px] text-ink-soft uppercase font-mono mb-1">Password (min 6 chars)</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            className="w-full bg-transparent border-none outline-none font-serif text-base text-ink"
-            required
-          />
-        </div>
-
-        <div className="pt-2">
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-2.5 bg-ink text-paper font-sans text-xs font-semibold tracking-wider uppercase hover:bg-brass transition-colors cursor-pointer"
-          >
-            {isLoading ? 'Creating Account…' : 'Register Account →'}
-          </button>
-        </div>
+    <div className="max-w-[380px] mx-auto pt-[9vh]">
+      <div className="font-serif text-[34px] font-bold tracking-tight">Market<span className="text-brass">Mind</span></div>
+      <p className="text-ink-soft mt-1">Why did it move? A research desk for Indian markets.</p>
+      <h1 className="font-serif text-xl mt-7">Open an account</h1>
+      <form onSubmit={handleSubmit}>
+        <Field id="name" label="Full name" value={fullName} onChange={setFullName} autoComplete="name" />
+        <Field id="email" label="Email" type="email" value={email} onChange={setEmail} autoComplete="email" />
+        <Field id="password" label="Password" type="password" value={password} onChange={setPassword} autoComplete="new-password" />
+        <div className="text-[13px] text-loss min-h-[20px]">{errorMsg}</div>
+        <button type="submit" disabled={isLoading} className="bg-ink text-paper px-[14px] py-1.5 cursor-pointer">
+          {isLoading ? 'Creating…' : 'Create account'}
+        </button>
+        <Link to="/login" className="ml-[10px] text-ink-soft underline text-sm">I have an account</Link>
+        <Link to="/" className="ml-[10px] text-ink-soft underline text-sm">← Back</Link>
       </form>
-
-      <div className="mt-8 pt-4 border-t border-rule text-xs text-ink-soft flex justify-between">
-        <span>Already have an account?</span>
-        <Link to="/login" className="text-ink hover:underline font-medium">Sign In</Link>
-      </div>
     </div>
   );
 };

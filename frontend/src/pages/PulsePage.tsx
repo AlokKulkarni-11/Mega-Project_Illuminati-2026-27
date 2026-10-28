@@ -177,7 +177,7 @@ export const PulsePage: React.FC = () => {
                         <span className={`px-1.5 py-0.5 text-[10px] rounded-none uppercase font-mono ${
                           item.confidence === 'unconfirmed'
                             ? 'bg-paper text-loss border border-rule'
-                            : 'bg-[#DCE9E2] text-gain'
+                            : 'bg-[rgb(var(--c-tint))] text-gain'
                         }`}>
                           {item.confidence}
                         </span>

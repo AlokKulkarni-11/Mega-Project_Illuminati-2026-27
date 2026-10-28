@@ -7,7 +7,10 @@ interface GlossaryTermProps {
 }
 
 export const GlossaryTerm: React.FC<GlossaryTermProps> = ({ termKey, children }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const [hot, setHot] = useState(false);
+  const isOpen = pinned || hot;
+  const setIsOpen = (v: boolean) => { setPinned(v); if (!v) setHot(false); };
   const containerRef = useRef<HTMLSpanElement>(null);
 
   const definition = GLOSSARY_TERMS[termKey] || {
@@ -27,16 +30,17 @@ export const GlossaryTerm: React.FC<GlossaryTermProps> = ({ termKey, children })
   }, []);
 
   return (
-    <span ref={containerRef} className="relative inline-block">
+    <span ref={containerRef} className="relative inline-block" onMouseEnter={() => setHot(true)} onMouseLeave={() => setHot(false)}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setPinned(!pinned)}
+        onFocus={() => setHot(true)}
+        onBlur={() => setHot(false)}
         onKeyDown={(e) => {
           if (e.key === 'Escape') setIsOpen(false);
         }}
         className="cursor-help border-b border-dashed border-ink-soft hover:text-brass text-inherit font-inherit inline text-left bg-transparent p-0 m-0"
-        title="Click to view definition"
-        aria-expanded={isOpen}
+                aria-expanded={isOpen}
       >
         {children || definition.term}
       </button>

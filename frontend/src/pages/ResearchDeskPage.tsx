@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Sparkline } from '../components/Sparkline';
+import { CandleChart } from '../components/CandleChart';
+import { ChartControls } from '../components/ChartControls';
+import { aggregate, RANGE_DAYS, RangeKey, ChartType, Interval } from '../features/chart/chartUtils';
+import { loadChartPrefs } from './SettingsPage';
 import { GlossaryTerm } from '../components/GlossaryTerm';
 import { useToast } from '../components/Toast';
 import {
@@ -23,6 +26,7 @@ export const ResearchDeskPage: React.FC = () => {
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [feedbackGiven, setFeedbackGiven] = useState<'helpful' | 'unhelpful' | null>(null);
   const [showSourcesTrail, setShowSourcesTrail] = useState(false);
+  const [chartOpts, setChartOpts] = useState<{ range: RangeKey; interval: Interval; type: ChartType; sma: boolean; volume: boolean }>(() => ({ range: '6M', sma: true, volume: true, ...loadChartPrefs() }));
 
   // Fetch instruments
   const { data: instruments } = useQuery({
@@ -48,8 +52,8 @@ export const ResearchDeskPage: React.FC = () => {
 
   // Fetch price history
   const { data: prices } = useQuery({
-    queryKey: ['prices', selectedSymbol],
-    queryFn: () => getPricesApi(selectedSymbol, 60),
+    queryKey: ['prices', selectedSymbol, 'chart'],
+    queryFn: () => getPricesApi(selectedSymbol, 260),
   });
 
   // Fetch explanation for symbol + date
@@ -147,7 +151,7 @@ export const ResearchDeskPage: React.FC = () => {
           value={queryInput}
           onChange={(e) => setQueryInput(e.target.value)}
           placeholder="why is TCS falling this week"
-          className="flex-1 bg-transparent border-none outline-none font-serif text-xl text-ink placeholder:italic placeholder:text-[#8C9187]"
+          className="flex-1 bg-transparent border-none outline-none font-serif text-xl text-ink placeholder:italic placeholder:text-ink-soft"
         />
         <button
           type="submit"
@@ -261,11 +265,17 @@ export const ResearchDeskPage: React.FC = () => {
           </div>
         )}
 
-        {/* Sparkline Chart */}
-        <Sparkline
-          data={prices?.points || []}
-          anomalyDate={selectedDate}
-          isGain={isGain}
+        {/* Price chart */}
+        <ChartControls {...chartOpts} onChange={(patch) => setChartOpts((o) => ({ ...o, ...patch }))} />
+        <CandleChart
+          bars={aggregate((prices?.points || []).slice(-RANGE_DAYS[chartOpts.range]), chartOpts.interval)}
+          type={chartOpts.type}
+          showSma={chartOpts.sma}
+          showVolume={chartOpts.volume}
+          anomalyDates={(anomalies || []).map((a) => a.date)}
+          selectedDate={selectedDate}
+          onSelectAnomaly={setSelectedDate}
+          label={`${selectedSymbol} ${chartOpts.type} chart, ${chartOpts.range}, ${chartOpts.interval} bars`}
         />
 
         {/* Signal Ledger: Three-Column Card */}
@@ -305,9 +315,9 @@ export const ResearchDeskPage: React.FC = () => {
               <span
                 className={`text-xs font-semibold px-2 py-0.5 rounded-sm ${
                   explanation?.signalAgreement === 'aligned'
-                    ? 'bg-[#DCE9E2] text-gain'
+                    ? 'bg-[rgb(var(--c-tint))] text-gain'
                     : explanation?.signalAgreement === 'diverging'
-                    ? 'bg-[#F1DCD5] text-loss'
+                    ? 'bg-[rgb(var(--c-losstint))] text-loss'
                     : 'bg-paper-inset text-ink-soft border border-rule'
                 }`}
               >
@@ -352,7 +362,7 @@ export const ResearchDeskPage: React.FC = () => {
                 {explanation.hasClearDriver ? 'Causal Analysis' : 'Engine Finding: Insufficient Driver'}
               </h2>
               <div className="confidence text-xs text-ink-soft">
-                Confidence: <b className="text-ink uppercase">{explanation.confidence}</b>
+                <GlossaryTerm termKey="confidence">Confidence</GlossaryTerm>: <b className="text-ink uppercase">{explanation.confidence}</b>
                 {explanation.causalCategory && (
                   <span className="ml-3 font-mono text-brass">
                     [<GlossaryTerm termKey="causal category">{explanation.causalCategory}</GlossaryTerm>]
@@ -429,8 +439,8 @@ export const ResearchDeskPage: React.FC = () => {
               {showSourcesTrail && (
                 <div className="mt-3 p-3 bg-paper-inset border border-rule space-y-2 text-xs">
                   <div><b>Scope:</b> {explanation.scope || 'unclear'}</div>
-                  <div><b>Causal Category:</b> {explanation.causalCategory}</div>
-                  <div><b>Signal Agreement:</b> {explanation.signalAgreement}</div>
+                  <div><b><GlossaryTerm termKey="causal category">Causal Category</GlossaryTerm>:</b> {explanation.causalCategory}</div>
+                  <div><b><GlossaryTerm termKey="signal agreement">Signal Agreement</GlossaryTerm>:</b> {explanation.signalAgreement}</div>
                   <div><b>Retrieved Sources:</b> {explanation.citations?.length || 0} citations indexed</div>
                 </div>
               )}

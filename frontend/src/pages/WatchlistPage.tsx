@@ -73,7 +73,7 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({ capabilities }) =>
           value={newSymbol}
           onChange={(e) => setNewSymbol(e.target.value)}
           placeholder="Add ticker (e.g. TCS, RELIANCE, INFY)"
-          className="flex-1 bg-transparent border-none outline-none font-serif text-lg text-ink placeholder:italic placeholder:text-[#8C9187]"
+          className="flex-1 bg-transparent border-none outline-none font-serif text-lg text-ink placeholder:italic placeholder:text-ink-soft"
         />
         <button
           type="submit"
@@ -126,9 +126,9 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({ capabilities }) =>
                           <span
                             className={`px-2 py-0.5 text-[11px] font-semibold ${
                               item.agreement === 'aligned'
-                                ? 'bg-[#DCE9E2] text-gain'
+                                ? 'bg-[rgb(var(--c-tint))] text-gain'
                                 : item.agreement === 'diverging'
-                                ? 'bg-[#F1DCD5] text-loss'
+                                ? 'bg-[rgb(var(--c-losstint))] text-loss'
                                 : 'bg-paper-inset text-ink-soft border border-rule'
                             }`}
                           >

@@ -31,7 +31,7 @@ export const Sparkline: React.FC<SparklineProps> = ({ data, anomalyDate, isGain 
   }));
 
   const anomalyPoint = chartData.find((d) => d.date === anomalyDate);
-  const strokeColor = isGain ? '#1F4E3D' : '#8B2E1F';
+  const strokeColor = isGain ? 'rgb(var(--c-gain))' : 'rgb(var(--c-loss))';
 
   return (
     <div className="w-full h-24 my-3 chart-row border-y border-rule py-1">
@@ -72,8 +72,8 @@ export const Sparkline: React.FC<SparklineProps> = ({ data, anomalyDate, isGain 
               x={anomalyPoint.date}
               y={anomalyPoint.close}
               r={4}
-              fill="#A8823C"
-              stroke="#FAFAF7"
+              fill="rgb(var(--c-brass))"
+              stroke="rgb(var(--c-inset))"
               strokeWidth={1.5}
             />
           )}

@@ -2,21 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Light = "Paper", Dark = "Night ledger" (green). Triplets so Tailwind opacity works. */
 :root {
-  --paper: #E7E9DE;
-  --paper-inset: #FAFAF7;
-  --ink: #1B2B22;
-  --ink-soft: #4B5A50;
-  --rule: #C6CBBC;
-  --loss: #8B2E1F;
-  --gain: #1F4E3D;
-  --brass: #A8823C;
-  --brass-soft: #E9DCC1;
+  --c-paper: 231 233 222;
+  --c-inset: 250 250 247;
+  --c-ink: 27 43 34;
+  --c-soft: 75 90 80;
+  --c-rule: 198 203 188;
+  --c-loss: 139 46 31;
+  --c-gain: 31 78 61;
+  --c-brass: 168 130 60;
+  --c-bs: 233 220 193;
+  --c-tint: 220 233 226;
+  --c-losstint: 241 220 213;
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  --c-paper: 20 28 23;
+  --c-inset: 28 38 32;
+  --c-ink: 228 231 218;
+  --c-soft: 163 174 159;
+  --c-rule: 52 66 58;
+  --c-loss: 228 138 118;
+  --c-gain: 111 196 154;
+  --c-brass: 201 165 90;
+  --c-bs: 58 51 34;
+  --c-tint: 31 52 42;
+  --c-losstint: 61 34 28;
+  color-scheme: dark;
+}
+:root[data-theme='auto'] { color-scheme: light dark; }
+@media (prefers-color-scheme: dark) {
+  :root[data-theme='auto'] {
+  --c-paper: 20 28 23;
+  --c-inset: 28 38 32;
+  --c-ink: 228 231 218;
+  --c-soft: 163 174 159;
+  --c-rule: 52 66 58;
+  --c-loss: 228 138 118;
+  --c-gain: 111 196 154;
+  --c-brass: 201 165 90;
+  --c-bs: 58 51 34;
+  --c-tint: 31 52 42;
+  --c-losstint: 61 34 28;
+  }
 }
 
 body {
-  background-color: var(--paper);
-  color: var(--ink);
+  background-color: rgb(var(--c-paper));
+  color: rgb(var(--c-ink));
   font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 15px;
   line-height: 1.55;
