@@ -197,9 +197,14 @@ def main():
     if args.interactive:
         print_banner()
         console.print("[bold yellow]Interactive Query Selection Mode[/bold yellow]")
-        symbol = console.input("[bold cyan]Enter Stock Ticker Symbol [default: TATASTEEL]: [/bold cyan]").strip() or "TATASTEEL"
-        movement_date = console.input("[bold cyan]Enter Movement Date (YYYY-MM-DD) [default: 2026-08-03]: [/bold cyan]").strip() or "2026-08-03"
-        query_context = console.input("[bold cyan]Enter optional query context [press Enter for none]: [/bold cyan]").strip()
+        try:
+            symbol = console.input("[bold cyan]Enter Stock Ticker Symbol [default: TATASTEEL]: [/bold cyan]").strip() or "TATASTEEL"
+            movement_date = console.input("[bold cyan]Enter Movement Date (YYYY-MM-DD) [default: 2026-08-03]: [/bold cyan]").strip() or "2026-08-03"
+            query_context = console.input("[bold cyan]Enter optional query context [press Enter for none]: [/bold cyan]").strip()
+        except (EOFError, KeyboardInterrupt):
+            symbol = "TATASTEEL"
+            movement_date = "2026-08-03"
+            query_context = ""
         run_marketmind_analysis(symbol, movement_date, query_context)
     else:
         run_marketmind_analysis(args.symbol, args.date, args.query)

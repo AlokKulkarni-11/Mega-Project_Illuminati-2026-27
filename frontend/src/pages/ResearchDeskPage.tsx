@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { CandleChart } from '../components/CandleChart';
 import { ChartControls } from '../components/ChartControls';
 import { aggregate, RANGE_DAYS, RangeKey, ChartType, Interval } from '../features/chart/chartUtils';
 import { loadChartPrefs } from './SettingsPage';
+import { Sparkline } from '../components/Sparkline';
 import { GlossaryTerm } from '../components/GlossaryTerm';
 import { useToast } from '../components/Toast';
 import {
@@ -19,6 +20,7 @@ import { Anomaly } from '../types';
 
 export const ResearchDeskPage: React.FC = () => {
   const { showToast } = useToast();
+  const queryClient = useQueryClient();
   const [queryInput, setQueryInput] = useState('');
   const [selectedSymbol, setSelectedSymbol] = useState('NIFTYBANK');
   const [selectedDate, setSelectedDate] = useState<string>('');
@@ -42,11 +44,8 @@ export const ResearchDeskPage: React.FC = () => {
 
   // Pick default anomaly date when anomalies load
   useEffect(() => {
-    if (anomalies && anomalies.length > 0) {
-      if (!selectedDate || !anomalies.some((a) => a.date === selectedDate)) {
-        // Default to the first anomaly (e.g. 2026-09-15 or latest)
-        setSelectedDate(anomalies[0].date);
-      }
+    if (anomalies && anomalies.length > 0 && !selectedDate) {
+      setSelectedDate(anomalies[0].date);
     }
   }, [anomalies, selectedDate]);
 
@@ -91,10 +90,56 @@ export const ResearchDeskPage: React.FC = () => {
     if (!queryInput.trim()) return;
 
     try {
+      // 1. Try rich natural language query understanding via Python ML service
+      try {
+        const mlResp = await fetch('http://localhost:8000/api/query/understand', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: queryInput.trim() }),
+        });
+        if (mlResp.ok) {
+          const mlData = await mlResp.json();
+          if (mlData.ticker) {
+            setSelectedSymbol(mlData.ticker);
+            let targetDt = mlData.end_date || mlData.start_date;
+            
+            if (!targetDt && mlData.date_expression) {
+              const lowerExpr = mlData.date_expression.toLowerCase();
+              if (lowerExpr.includes('feb')) targetDt = '2025-02-28';
+              else if (lowerExpr.includes('jan')) targetDt = '2026-01-31';
+              else if (lowerExpr.includes('mar')) targetDt = '2026-03-31';
+              else if (lowerExpr.includes('apr')) targetDt = '2025-04-30';
+              else if (lowerExpr.includes('jun')) targetDt = '2025-06-30';
+              else if (lowerExpr.includes('nov')) targetDt = '2025-11-26';
+            }
+
+            setSelectedDate(targetDt || '');
+            setEmptyNote(null);
+            queryClient.invalidateQueries({ queryKey: ['explanation'] });
+            queryClient.invalidateQueries({ queryKey: ['anomalies'] });
+            queryClient.invalidateQueries({ queryKey: ['prices'] });
+            setTimeout(() => {
+              document.getElementById('explanation-section')?.scrollIntoView({ behavior: 'smooth' });
+            }, 400);
+            return;
+          }
+        }
+      } catch {
+        // Fall back to Spring Boot query resolution
+      }
+
+      // 2. Fallback to Spring Boot /api/query/resolve
       const res = await resolveQueryApi(queryInput.trim());
       if (res.symbols && res.symbols.length > 0) {
         setSelectedSymbol(res.symbols[0]);
+        setSelectedDate('');
         setEmptyNote(null);
+        queryClient.invalidateQueries({ queryKey: ['explanation'] });
+        queryClient.invalidateQueries({ queryKey: ['anomalies'] });
+        queryClient.invalidateQueries({ queryKey: ['prices'] });
+        setTimeout(() => {
+          document.getElementById('explanation-section')?.scrollIntoView({ behavior: 'smooth' });
+        }, 400);
       } else {
         setEmptyNote(res.unmatchedMessage || 'Not in this dossier tracked universe yet.');
       }
@@ -105,8 +150,12 @@ export const ResearchDeskPage: React.FC = () => {
 
   const handleSelectChip = (sym: string) => {
     setSelectedSymbol(sym);
+    setSelectedDate(''); // Let it pick the anomaly for this new symbol
     setEmptyNote(null);
     setFeedbackGiven(null);
+    queryClient.invalidateQueries({ queryKey: ['explanation'] });
+    queryClient.invalidateQueries({ queryKey: ['anomalies'] });
+    queryClient.invalidateQueries({ queryKey: ['prices'] });
   };
 
   const handleFeedback = async (helpful: boolean) => {
@@ -128,7 +177,7 @@ export const ResearchDeskPage: React.FC = () => {
   const instrumentName = currentInstrument ? currentInstrument.name : selectedSymbol;
 
   const currentPricePoint = prices?.points && prices.points.length > 0
-    ? prices.points[prices.points.length - 1]
+    ? (selectedDate ? (prices.points.find((p) => p.date === selectedDate) || prices.points[prices.points.length - 1]) : prices.points[prices.points.length - 1])
     : null;
 
   const currentPriceStr = currentPricePoint
@@ -193,10 +242,41 @@ export const ResearchDeskPage: React.FC = () => {
 
       {/* Result Dossier */}
       <div id="dossier" className="mt-9 print-page">
-        {/* Case Number & Actions */}
-        <div className="flex justify-between items-center mb-1.5">
-          <div className="case-no text-xs text-ink-soft tracking-wide">
-            Dossier No. {selectedSymbol === 'NIFTYBANK' ? '0416' : '0417'} — Event Observation
+        {/* Case Number, Date Controls & Actions */}
+        <div className="flex justify-between items-center mb-2.5 flex-wrap gap-2">
+          <div className="case-no text-xs text-ink-soft tracking-wide flex items-center flex-wrap gap-2">
+            <span>Dossier No. {selectedSymbol === 'NIFTYBANK' ? '0416' : '0417'} — Event Observation</span>
+            <span className="text-rule hidden sm:inline">|</span>
+            <label className="flex items-center space-x-1.5 font-sans text-xs text-ink">
+              <span className="text-ink-soft">Date:</span>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => {
+                  setSelectedDate(e.target.value);
+                  queryClient.invalidateQueries({ queryKey: ['explanation'] });
+                }}
+                className="border border-rule px-2 py-0.5 bg-paper text-ink text-xs rounded-sm focus:border-ink outline-none"
+                title="Specify any exact date"
+              />
+            </label>
+            {anomalies && anomalies.length > 0 && (
+              <select
+                value={selectedDate}
+                onChange={(e) => {
+                  setSelectedDate(e.target.value);
+                  queryClient.invalidateQueries({ queryKey: ['explanation'] });
+                }}
+                className="border border-rule px-2 py-0.5 bg-paper text-ink text-xs rounded-sm focus:border-ink outline-none cursor-pointer"
+                title="Select a detected event date"
+              >
+                {anomalies.map((a) => (
+                  <option key={a.date} value={a.date}>
+                    Event: {a.date} ({a.returnPct > 0 ? `+${a.returnPct.toFixed(2)}%` : `${a.returnPct.toFixed(2)}%`})
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
           <div className="flex items-center space-x-3 text-xs non-printable">
             <button
@@ -255,6 +335,11 @@ export const ResearchDeskPage: React.FC = () => {
                 onChange={(e) => setSelectedDate(e.target.value)}
                 className="bg-paper-inset border border-rule text-ink px-2 py-1 text-xs outline-none"
               >
+                {selectedDate && !anomalies.some((a: Anomaly) => a.date === selectedDate) && (
+                  <option value={selectedDate}>
+                    {selectedDate} — QUERIED WINDOW (Live FinBERT Analysis)
+                  </option>
+                )}
                 {anomalies.map((a: Anomaly) => (
                   <option key={a.date} value={a.date}>
                     {a.date} — {a.direction.toUpperCase()} ({a.returnPct > 0 ? '+' : ''}{a.returnPct}%, z={a.returnZ}) {a.confidence === 'unconfirmed' ? '[Abstention]' : `[${a.confidence}]`}
@@ -285,11 +370,29 @@ export const ResearchDeskPage: React.FC = () => {
             <div className="col-label text-[11px] text-ink-soft mb-2 uppercase tracking-wide">
               — <GlossaryTerm termKey="regime">Price Regime</GlossaryTerm>
             </div>
-            <div className={`col-value font-serif text-xl font-medium ${isGain ? 'text-gain' : 'text-loss'}`}>
-              {explanation?.priceDirection === 'bullish' ? 'Bullish' : 'Bearish'}
+            <div
+              className={`col-value font-serif text-xl font-medium ${
+                explanation?.priceDirection === 'bullish'
+                  ? 'text-gain'
+                  : explanation?.priceDirection === 'bearish'
+                  ? 'text-loss'
+                  : 'text-ink'
+              }`}
+            >
+              {explanation?.priceDirection === 'bullish'
+                ? 'Bullish'
+                : explanation?.priceDirection === 'bearish'
+                ? 'Bearish'
+                : 'Consolidating'}
             </div>
             <div className="col-sub text-xs text-ink-soft mt-1">
-              <GlossaryTerm termKey="z-score">z-score</GlossaryTerm> {explanation ? explanation.returnZ : '-2.2'} · 60-day window
+              <GlossaryTerm termKey="z-score">z-score</GlossaryTerm>{' '}
+              {explanation
+                ? typeof explanation.returnZ === 'number'
+                  ? (explanation.returnZ > 0 ? `+${explanation.returnZ.toFixed(2)}` : `${explanation.returnZ.toFixed(2)}`)
+                  : explanation.returnZ
+                : '-2.20'}{' '}
+              · 60-day window
             </div>
           </div>
 
@@ -299,11 +402,20 @@ export const ResearchDeskPage: React.FC = () => {
               — <GlossaryTerm termKey="sentiment">News Sentiment</GlossaryTerm>
             </div>
             <div className="col-value font-serif text-xl font-medium text-ink">
-              {explanation?.newsDirection ? explanation.newsDirection.toUpperCase() : 'NEUTRAL'}
+              {explanation?.newsDirection
+                ? explanation.newsDirection.replace(/_/g, ' ').toUpperCase()
+                : 'NO NEWS AVAILABLE'}
             </div>
             <div className="col-sub text-xs text-ink-soft mt-1">
-              {explanation?.hasClearDriver ? 'Verified press drivers identified' : 'No clear narrative in news'}
+              {explanation?.newsDirection === 'no_news_available'
+                ? 'No verified news articles found for date'
+                : explanation?.newsDirection === 'retrieval_failed'
+                ? 'Online news retrieval was unavailable'
+                : explanation?.hasClearDriver
+                ? 'Verified press drivers identified'
+                : 'No clear narrative in news'}
             </div>
+
           </div>
 
           {/* Col 3: Signal Agreement Meter */}
@@ -356,19 +468,35 @@ export const ResearchDeskPage: React.FC = () => {
             Reviewing the case file…
           </div>
         ) : explanation ? (
-          <div className="explanation-section my-6">
+          <div id="explanation-section" className="explanation-section my-6">
             <div className="explain-head flex justify-between items-baseline mb-3">
               <h2 className="font-serif text-xl font-medium text-ink">
                 {explanation.hasClearDriver ? 'Causal Analysis' : 'Engine Finding: Insufficient Driver'}
               </h2>
-              <div className="confidence text-xs text-ink-soft">
-                <GlossaryTerm termKey="confidence">Confidence</GlossaryTerm>: <b className="text-ink uppercase">{explanation.confidence}</b>
+              <div className="confidence text-xs text-ink-soft flex items-center gap-2">
+                {explanation.validationStatus && (
+                  <span
+                    className={`font-mono px-1.5 py-0.5 rounded text-[10px] uppercase font-semibold ${
+                      explanation.validationStatus === 'VALID'
+                        ? 'bg-[#DCE9E2] text-gain'
+                        : explanation.validationStatus === 'PARTIALLY_VALID'
+                        ? 'bg-[#F9EDD5] text-[#8C6D1F]'
+                        : 'bg-paper-inset text-ink-soft border border-rule'
+                    }`}
+                  >
+                    Evidence: {explanation.validationStatus.replace(/_/g, ' ')}
+                  </span>
+                )}
+                <span>
+                  <GlossaryTerm termKey="confidence">Confidence</GlossaryTerm>: <b className="text-ink uppercase">{explanation.confidence}</b>
+                </span>
                 {explanation.causalCategory && (
-                  <span className="ml-3 font-mono text-brass">
+                  <span className="font-mono text-brass">
                     [<GlossaryTerm termKey="causal category">{explanation.causalCategory}</GlossaryTerm>]
                   </span>
                 )}
               </div>
+
             </div>
 
             {/* Distinct First-Class Abstention State */}
@@ -391,7 +519,7 @@ export const ResearchDeskPage: React.FC = () => {
               </div>
             ) : (
               /* Confirmed Explanation State */
-              <div className="explain-body text-[14.5px] text-ink leading-relaxed">
+              <div className="explain-body text-[14.5px] text-ink leading-relaxed whitespace-pre-line space-y-3">
                 <p>
                   {explanation.causeSummary}
                   {explanation.citations && explanation.citations.map((c) => (

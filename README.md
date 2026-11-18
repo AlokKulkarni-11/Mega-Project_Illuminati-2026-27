@@ -3,6 +3,8 @@
 
 A financial intelligence web application that explains *why* Indian indices and stocks moved, combining price statistical anomalies, financial news citations, and market sentiment breadth.
 
+> 📖 **Comprehensive System Documentation**: For a deep-dive into mathematical formulations, system topologies, FinBERT/XGBoost pipelines, and the Google Gemini 200–250 word causal synthesis architecture, see **[PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md)**.
+
 ---
 
 ## Architecture Overview
@@ -69,8 +71,9 @@ cd frontend
 npm install
 npm test
 npm run dev
-=======
-# MarketMind — Explainable AI Stock Movement & Causal Reasoning System
+```
+
+---
 
 Academic Project for **Walchand College of Engineering, Sangli** (Department of Computer Science & Engineering)  
 **Academic Year**: 2026–2027 | **Guide**: Ms. Aditi A Pawde
@@ -104,12 +107,11 @@ python ml_service/cli.py --interactive
 
 # Test explicit abstention safeguard (date prior to news corpus):
 python ml_service/cli.py --symbol INFY --date 2020-01-01
->>>>>>> 69617a675d656e3ce0f392c5a6daa10af7f2f896
 ```
 
 ---
 
-## Switching on the real engine later (checklist)
+## Switching on the real engine (checklist)
 
 1. Deploy the Python/FastAPI engine and note its base URL (e.g., `http://engine-service:8000`).
 2. Set `ENGINE_MODE=http`, `ENGINE_BASE_URL=http://engine-service:8000`, and `MARKETMIND_ENGINE_SCHEMA_ENABLED=true` (needs the pgvector extension).
@@ -117,7 +119,9 @@ python ml_service/cli.py --symbol INFY --date 2020-01-01
 4. Run the contract tests (`AbstractInsightEngineContractTest`) against the live service. Fix any DTO drift **in the adapter, not the frontend**.
 5. Confirm the "Sample data — engine not connected" banner disappears (it keys off `capabilities.engine.mode`).
 6. Expect `explanation` to be slow (LLM call): keep the 30-min cache and the loading copy ("Reviewing the case file…").
-=======
+
+---
+
 ## 🚀 Quickstart & Setup Guide
 
 ### 1. Install Dependencies
@@ -149,7 +153,10 @@ Access Interactive API Docs: [http://localhost:8000/docs](http://localhost:8000/
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
+| `GET` | `/` or `/dashboard` | Interactive Natural-Language Stock News Analysis Dashboard |
 | `GET` | `/health` | Health check endpoint |
+| `POST` | `/api/query/understand` | Extracts stock, dates, intent, and clarification requirements from natural language queries |
+| `POST` | `/api/analysis/query` | Executes end-to-end retrieval, FinBERT inference, sentiment aggregation, and evidence explanation |
 | `POST` | `/api/v1/predict/price-regime` | Predicts stock regime (`bullish`/`bearish`/`consolidating`) from OHLCV data |
 | `POST` | `/api/v1/analyze/sentiment-causal` | Analyzes text sentiment and causal category |
 | `POST` | `/api/v1/evaluate/signal-agreement` | Evaluates agreement between price trend & news sentiment |
@@ -157,7 +164,8 @@ Access Interactive API Docs: [http://localhost:8000/docs](http://localhost:8000/
 
 ---
 
-### 👨‍💻 Author
-**Piyush Vilas Rajurkar** (PRN: 23510087)  
-ML & RAG Causal Engine Lead — MarketMind Team
->>>>>>> 69617a675d656e3ce0f392c5a6daa10af7f2f896
+### 👨‍💻 Team & Authors
+* **Piyush Vilas Rajurkar** (PRN: 23510087) — ML & RAG Causal Engine Lead
+* **Alok Avinash Kulkarni** (PRN: 22510013) — Backend Architecture & Database Lead
+* **Piyush Vikas Dawkhare** (PRN: 23510056) — Data & Pipeline Engineering
+* **Niharika Santoshkumar Pasnur** (PRN: 23510119) — Frontend Research Desk Engineering

@@ -26,8 +26,8 @@ public class HttpInsightEngine implements InsightEngine {
 
     @Autowired
     public HttpInsightEngine(
-            @Value("${marketmind.engine.base-url:http://localhost:8000}") String baseUrl,
-            @Value("${marketmind.engine.timeout-ms:15000}") int timeoutMs
+            @Value("${marketmind.engine.base-url:http://127.0.0.1:8000}") String baseUrl,
+            @Value("${marketmind.engine.timeout-ms:60000}") int timeoutMs
     ) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(Duration.ofMillis(timeoutMs));

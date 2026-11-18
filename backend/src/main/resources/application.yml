@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${PORT:8085}
   error:
     include-message: always
     include-binding-errors: always
@@ -40,9 +40,9 @@ marketmind:
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://localhost:3000}
   engine:
-    mode: ${ENGINE_MODE:mock} # disabled | mock | http
-    base-url: ${ENGINE_BASE_URL:http://localhost:8000}
-    timeout-ms: 15000
+    mode: ${ENGINE_MODE:http} # disabled | mock | http
+    base-url: ${ENGINE_BASE_URL:http://127.0.0.1:8000}
+    timeout-ms: ${ENGINE_TIMEOUT_MS:60000}
     schema:
       enabled: ${MARKETMIND_ENGINE_SCHEMA_ENABLED:false}
 

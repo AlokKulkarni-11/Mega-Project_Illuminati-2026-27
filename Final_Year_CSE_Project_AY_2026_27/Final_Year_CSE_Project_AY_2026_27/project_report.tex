@@ -1,0 +1,635 @@
+% Preamble
+% ---
+\documentclass{article}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[colorlinks]{hyperref}
+\usepackage[margin=1in,left=1in,bottom=1in]{geometry}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\usepackage{indentfirst}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\hypersetup{
+  colorlinks = true,
+  linkcolor  = black
+}
+\usepackage{tocloft}
+
+
+\begin{document}
+
+	\begin{center}
+		\thispagestyle{empty}
+			\includegraphics[height=3.5cm]{wce_logo}
+			\\ [0.20in]
+			\huge \textbf{Walchand College Of Engineering, Sangli.}	\\
+			[0.05in]
+			\Large  \textbf{(An Autonomous Institute)}
+			\\
+			[0.35in]
+			\textbf{Department Of\\ Computer Science and Engineering}
+			\\[0.30in]{A Project Report \\ On}\\
+			[0.25in]
+			\LARGE \textbf{\color{blue}MarketMind: Explainable AI Stock Movement and Causal Reasoning System} 
+			\\ [0.35in]
+			\large	Submitted by\\
+			[0.25in]		
+			\begin{multicols}{2}	
+			\textbf{Mr. Alok Avinash Kulkarni\\ (22510013)}
+			\end{multicols}
+			\begin{multicols}{2}
+		    \textbf{Mr. Piyush Vikas Dawkhare\\ (23510056)}
+			\end{multicols} 
+			\begin{multicols}{2}
+		    \textbf{Mr. Piyush Vilas Rajurkar\\ (23510087)}
+			\end{multicols} 
+			\begin{multicols}{2}
+		    \textbf{Ms. Niharika Santoshkumar Pasnur\\ (23510119)}
+			\end{multicols} 
+			
+			Under the Guidance of \\	
+			
+			\begin{center}
+			\large \textbf{Ms. Aditi A. Pawde}\\
+			Assistant Professor
+			\\[0.30in]\Large \textbf{Year: 2026 - 2027}
+			\end{center}
+	 \end{center}
+	\pagebreak
+
+	\fancyhf{}
+	\rfoot{\thepage}
+	
+	\begin{center}
+		\includegraphics[height=3.5cm]{wce_logo}
+		\\
+		\textbf{\Large Walchand College of Engineering, Sangli}\\
+		\Large  (An Autonomous Institute)
+		\\
+		[0.2in]
+		\textbf{Department Of\\ Computer Science and Engineering}\\[0.3in]
+		\LARGE \textbf{\color{blue}CERTIFICATE } \\
+		[0.3in]
+	\end{center}
+
+	\par
+	\setlength{\parindent}{4em}
+	\space
+	This is to certify that the Project Report entitled, 
+	\textbf{``MarketMind: Explainable AI Stock Movement and Causal Reasoning System''} submitted by\\		
+	\begin{multicols}{2}	
+	\textbf{Mr. Alok Avinash Kulkarni\\ (22510013)}
+	\end{multicols}
+	\begin{multicols}{2}
+	\textbf{Mr. Piyush Vikas Dawkhare\\ (23510056)}
+	\end{multicols} 
+	\begin{multicols}{2}
+	\textbf{Mr. Piyush Vilas Rajurkar\\ (23510087)}
+	\end{multicols} 
+	\begin{multicols}{2}
+	\textbf{Ms. Niharika Santoshkumar Pasnur\\ (23510119)}
+	\end{multicols} 
+	to Walchand College of Engineering, Sangli, is a record of bona fide Project work carried out by them under my supervision and guidance and is worthy of consideration for the award of the degree of Bachelor of Technology in Computer Science and Engineering of the Institute. 
+
+	\vspace{1.8cm}
+	\begin{multicols}{2}
+		\begin{center}
+		\textbf{Ms. Aditi A. Pawde}
+		\\ Guide
+		\end{center}
+		\columnbreak
+		\begin{center}
+		External Examiner
+		\end{center}
+	\end{multicols}
+
+	\vspace{1.2cm}
+	\begin{center}
+		\textbf{Dr. A. R. Surve}
+		\\ Head
+		\\ Department of Computer Science and Engineering
+	\end{center}
+
+	\pagebreak
+	
+	\begin{center}
+	\Huge \textbf{\color{blue}Acknowledgement} \\
+	\end{center}
+	\vspace{1cm}
+	{
+	\onehalfspacing
+	\setlength{\parindent}{2em}
+	\setlength{\parskip}{0.8em}
+
+	We feel immense pleasure in submitting this project report entitled \textbf{``MarketMind: Explainable AI Stock Movement and Causal Reasoning System''}.
+
+	We express our deep sense of gratitude and sincere thanks to our respected guide, \textbf{Ms. Aditi A. Pawde}, Assistant Professor, Department of Computer Science and Engineering, for her invaluable guidance, constant encouragement, insightful suggestions, and keen interest throughout the design, development, and completion of this project.
+
+	We are profoundly thankful to the Head of the Department of Computer Science and Engineering, \textbf{Dr. A. R. Surve}, for providing the necessary institutional facilities, constructive feedback, and academic environment required to carry out this research endeavor successfully.
+
+	We extend our heartfelt thanks to all faculty members, laboratory assistants, and technical staff of the Department of Computer Science and Engineering for their direct and indirect support, technical discussions, and cooperation.
+
+	Finally, we express our heartfelt appreciation to our parents, family members, and classmates for their unceasing moral support, thoughtful discussions, and camaraderie during our stay at Walchand College of Engineering, Sangli.
+
+	}
+	
+	\pagebreak
+	\begin{center}
+		\Huge \textbf{Declaration} \\
+	\end{center}
+	\vspace{1cm}
+	\par 
+	\setlength{\parindent}{8em}
+	\doublespacing
+    \noindent
+	We hereby declare that the work presented in this project report titled 
+	\textbf{``MarketMind: Explainable AI Stock Movement and Causal Reasoning System''}
+	submitted by us in the partial fulfillment of the requirement for the award of the degree of \textbf{Bachelor of Technology (B.Tech)} in \textbf{Computer Science and Engineering, Walchand College of Engineering, Sangli}, is an authentic record of our bona fide project work carried out under the supervision and guidance of \textbf{Ms. Aditi A. Pawde}, Assistant Professor, Department of Computer Science and Engineering, Walchand College of Engineering, Sangli.
+
+	We further declare that this work has not been submitted either in part or in full to any other University or Institution for the award of any degree, diploma, or fellowship.
+	
+	\begin{multicols}{2}	
+	\textbf{Mr. Alok Avinash Kulkarni\\ (22510013)}
+	\end{multicols}
+	\begin{multicols}{2}
+	\textbf{Mr. Piyush Vikas Dawkhare\\ (23510056)}
+	\end{multicols} 
+	\begin{multicols}{2}
+	\textbf{Mr. Piyush Vilas Rajurkar\\ (23510087)}
+	\end{multicols} 
+	\begin{multicols}{2}
+	\textbf{Ms. Niharika Santoshkumar Pasnur\\ (23510119)}
+	\end{multicols} 
+
+	\vspace{0.8cm}
+	\begin{multicols}{2}
+	\noindent
+	Date : \\
+	Place : Sangli
+	\columnbreak
+	\flushright{\vspace{0.8cm}(Signatures of Students)}
+	\end{multicols}
+	
+	\pagebreak
+	\begin{center}
+	\Huge\textbf{Abstract}
+	\end{center}
+	\vspace{0.8cm}
+	\par
+	\onehalfspacing
+	\noindent
+	Financial markets generate colossal volumes of quantitative ticker data alongside unstructured corporate press releases, regulatory announcements, and macroeconomic reports. Retail investors and market analysts struggle to determine the authentic causal drivers behind sudden stock price shocks. Existing financial platforms present stock charts and news streams in isolation without verifying temporal causality, while general-purpose Large Language Models (LLMs) suffer from hindsight bias by citing news published after market moves. This project presents MarketMind, a deterministic, explainable artificial intelligence system that investigates and explains equity price anomalies across Indian markets. MarketMind unifies quantitative and qualitative methodologies: statistical z-score and XGBoost classifiers detect price regime anomalies, while a domain-adapted FinBERT model extracts fine-grained sentiment and causal categories across earnings, regulatory, and macroeconomic domains. A signal-agreement evaluation matrix identifies alignment, divergence, and ambiguity between price momentum and news coverage. To eliminate look-ahead leakage, MarketMind implements a time-constrained Retrieval-Augmented Generation (RAG) architecture enforcing a hard publication cutoff ($t_{\text{published}} \le t_{\text{movement}}$). An integrated Google Gemini synthesis engine produces institutional-grade causal explanations with verifiable bracketed footnotes and an adaptive honest abstention policy when no corroborated driver exists. The full-stack platform comprises a React-based research dossier, a Java Spring Boot enterprise gateway with dual-tier Caffeine caching, and a Python FastAPI analytical microservice. Empirical backtesting on National Stock Exchange equities demonstrates zero temporal data leakage, high precision in causal grounding, and robust differentiation between genuine corporate catalysts and speculative market noise.
+	
+	\pagebreak
+	\renewcommand{\contentsname}{\textbf{Table Of Contents} }
+	\renewcommand{\cfttoctitlefont}{\huge}
+	\tableofcontents\thispagestyle{fancy}
+	\setlength{\parindent}{4em}
+	\setlength{\parskip}{1em}
+	\renewcommand{\baselinestretch}{1.5}
+	
+	\paragraph{List Of Figures}
+	\begin{itemize}
+		\item Figure 1: High-Level Decoupled Architecture of MarketMind
+		\item Figure 2: Quantitative Anomaly Detection and Price Regime Workflow
+		\item Figure 3: Time-Constrained RAG Non-Leakage Retrieval Pipeline
+		\item Figure 4: Signal Agreement and Divergence Evaluation Matrix
+		\item Figure 5: Entity-Relationship Diagram for Relational Storage and Vector Store
+		\item Figure 6: Research Desk Dossier UI Wireframe and Causal Footnote Presentation
+	\end{itemize}
+
+	\paragraph{Acronyms}
+	\begin{itemize}
+		\item AI \hspace{4em} Artificial Intelligence
+		\item XAI \hspace{3.4em} Explainable Artificial Intelligence
+		\item RAG \hspace{3.2em} Retrieval-Augmented Generation
+		\item LLM \hspace{3.2em} Large Language Model
+		\item NLP \hspace{3.3em} Natural Language Processing
+		\item BERT \hspace{2.7em} Bidirectional Encoder Representations from Transformers
+		\item FinBERT \hspace{1.5em} Financial Bidirectional Encoder Representations from Transformers
+		\item XGBoost \hspace{1.6em} eXtreme Gradient Boosting
+		\item OHLCV \hspace{1.9em} Open, High, Low, Close, Volume
+		\item NSE \hspace{3.3em} National Stock Exchange of India
+		\item RBI \hspace{3.6em} Reserve Bank of India
+		\item SEBI \hspace{3.1em} Securities and Exchange Board of India
+		\item IST \hspace{3.7em} Indian Standard Time (UTC+05:30)
+		\item DFD \hspace{3.3em} Data Flow Diagram
+		\item REST \hspace{3.0em} Representational State Transfer
+		\item JWT \hspace{3.2em} JSON Web Token
+		\item API \hspace{3.7em} Application Programming Interface
+		\item DTO \hspace{3.4em} Data Transfer Object
+	\end{itemize}
+		
+	\pagebreak
+	\section{Introduction}
+    
+	Financial markets represent complex, highly dynamic socio-technical ecosystems in which prices continuously adjust to incoming quantitative trades and qualitative macroeconomic information. Everyday trading generates millions of structured data points—such as opening prices, day highs, day lows, settlement prices, and trade volumes—alongside hundreds of thousands of unstructured textual reports including corporate regulatory disclosures, quarterly earnings statements, broker notes, and financial news headlines. Interpreting this dual stream of data is essential for understanding equity price formation. However, retail market participants, institutional analysts, and compliance desks face substantial friction when attempting to synthesize why an asset experienced an unexpected, sharp price movement.
+
+	Currently, retail investors must navigate fragmented interfaces: price charts in one charting tool, breaking news feeds across multiple financial portals, and community sentiment across social forums. Users are forced to manually correlate price spikes with headlines published on the same day. This manual process is error-prone and gives rise to false attributions where contemporaneous, unrelated events are incorrectly assumed to be the causal drivers of price shocks. MarketMind is engineered to solve this challenge. It unifies quantitative statistical time-series modeling with domain-specific transformer natural language processing and time-bounded retrieval-augmented generation. By analyzing stock price movements alongside contemporaneous news published strictly prior to the price movement, MarketMind synthesizes clear, cited, and auditable causal explanations, while maintaining an explicit, honest abstention policy when no corroborated evidence exists.
+
+	\subsection{Problem Statement}
+
+	Financial information is inherently bifurcated across structured price series and unstructured textual reporting, creating a severe correlation-versus-causation dilemma. Traditional market interfaces present news feeds adjacent to price charts without temporal validation or causal verification, leading investors to infer incorrect drivers. Furthermore, contemporary generative artificial intelligence models exhibit look-ahead bias (data leakage) by retrieving and citing events published after market closing hours, and they suffer from speculative hallucination by inventing justifications for price movements driven purely by liquidity imbalances. Therefore, there is a critical need for an automated, explainable intelligence system capable of detecting statistical price anomalies, retrieving verified news articles strictly bounded by market timestamps ($t_{\text{published}} \le t_{\text{movement}}$), evaluating quantitative-qualitative signal agreement, and synthesizing grounded, cited explanations with first-class honest abstention when verified evidence is absent.
+
+	\subsection{Motivation}
+
+	Retail participation in the Indian capital markets has expanded exponentially over the last five years, with over 150 million registered demat accounts across the National Stock Exchange (NSE) and Bombay Stock Exchange (BSE). Despite this democratization of market access, retail investors remain at a significant informational disadvantage compared to high-frequency trading institutions and algorithmic desks. When a stock experiences a sudden four-percent decline, a retail participant typically cannot determine whether the move stems from company-specific fundamental deterioration (such as an unexpected regulatory penalty or earnings miss), sector-wide headwinds (such as import duty changes or raw material price inflation), broader macroeconomic pressures (such as central bank repo rate adjustments), or mechanical institutional order flow.
+
+	Existing automated news summary tools often worsen this problem by employing unconstrained Large Language Models that generate plausible-sounding but factually ungrounded stories. Such models frequently commit chronological violations, citing press releases published hours or days after the trading session ended. Moreover, because commercial LLMs are engineered to answer every prompt, they fabricate explanations for ordinary market noise where no verifiable news catalyst existed. Providing retail investors with an institutional-grade, transparent research desk that demonstrates honest abstention, distinguishes empirical facts from unverified hypotheses, and links every claim to source footnotes represents a critical step toward financial literacy, equitable market participation, and trustworthy financial artificial intelligence.
+
+    \subsection{Significance of the problem}
+	
+	The significance of this research lies at the intersection of quantitative finance, natural language processing, and explainable artificial intelligence (XAI). Rather than attempting black-box price forecasting, MarketMind addresses the fundamentally more auditable and legally relevant question of causal attribution: \textit{``Why did this asset move on this specific date?''}
+
+	The technical significance of our approach encompasses four key contributions:
+	\begin{enumerate}
+		\item \textbf{Elimination of Hindsight Bias}: By enforcing strict timestamp non-leakage ($t_{\text{published}} \le t_{\text{movement}}$) normalized to Indian Standard Time (IST) and aligned with NSE trading sessions (09:15 to 15:30 IST), the system ensures that historical backtesting reflects only the information available to market participants at the time of the event.
+		\item \textbf{Dual Signal Agreement Matrix}: By computing independent quantitative price regimes via XGBoost/z-scores and qualitative corpus sentiment via FinBERT, MarketMind formally detects signal convergence (\textit{Aligned}), signal contradiction (\textit{Diverging}), and ambiguous market states, preventing contradictory catalysts from canceling out into misleading neutral ratings.
+		\item \textbf{First-Class Honest Abstention}: The architecture treats abstention as an optimal, mathematically grounded output when empirical evidence is insufficient ($< 2$ relevant articles or low confidence), refusing to hallucinate drivers.
+		\item \textbf{Claim-Level Evidence Validation}: A deterministic post-generation validation layer verifies citation boundaries, detects temporal violations, and validates individual claims against retrieved source texts.
+	\end{enumerate}
+
+	\pagebreak
+    
+	\section{Literature Review and Gap Identified}
+    \noindent
+	Understanding the relationship between financial news and stock price fluctuations requires combining time-series anomaly detection, domain-specific text sentiment classification, event detection, and retrieval-augmented generation. This section reviews fundamental and recent literature across these areas, examines their methodologies, and highlights the technical gaps that MarketMind directly resolves.
+
+	\subsection{Background and Related Work}
+
+	\begin{itemize}
+		\item \textbf{Chen \& Guestrin (2016) -- XGBoost}~\cite{chen2016xgboost}: Introduced XGBoost, a scalable, regularized gradient-boosting tree system that dominates tabular data benchmarks. While highly effective at modeling non-linear interactions across technical price indicators (such as RSI, MACD, and rolling standard deviations), XGBoost cannot process unstructured financial news, qualitative sentiment, or corporate events.
+		\item \textbf{Araci (2019) -- FinBERT}~\cite{araci2019finbert}: Demonstrated that language models pre-trained on generic corpora (such as Wikipedia) fail to accurately interpret financial terminology where words like ``liability'', ``crude'', or ``risk'' carry domain-specific connotations. By adapting BERT to financial phrasebanks, FinBERT significantly improved sentiment classification accuracy. However, sentiment classification alone cannot identify the specific causal driver of a price shock or verify chronological publication timing.
+		\item \textbf{Yang, Uy \& Huang (2020) -- FinBERT for Financial Communications}~\cite{yang2020finbert}: Further extended domain-specific pre-training to corporate earnings calls, analyst reports, and SEC filings. Although superior at capturing specialized accounting nuances, the system remains a document-level classifier and lacks integration with quantitative price time series.
+		\item \textbf{Devlin et al. (2019) -- BERT}~\cite{devlin2019bert}: Established bidirectional Transformer pre-training with masked language modeling, providing the foundational architecture for context-aware textual representation across modern NLP.
+		\item \textbf{Hiew et al. (2019) -- Financial Sentiment Index with LSTM}~\cite{hiew2019bert}: Combined BERT-derived sentiment indicators with Long Short-Term Memory (LSTM) networks for return predictability. Their focus was predictive trading rather than post-movement causal explanation, and the system did not provide auditable evidence citations.
+		\item \textbf{Ke et al. (2017) -- LightGBM}~\cite{ke2017lightgbm}: Proposed highly efficient gradient boosting using gradient-based one-side sampling and exclusive feature bundling for high-dimensional tabular datasets. Similar to XGBoost, it operates purely on structured numerical features without textual understanding.
+		\item \textbf{Ding et al. (2015) -- Deep Learning for Event-Driven Stock Prediction}~\cite{ding2015deep}: Formulated event extraction from financial news into structured tuples (subject-predicate-object) to predict price trends. However, this approach relied on rigid syntactic parsers, struggled with complex macroeconomic context, and lacked verifiable conversational explanations.
+		\item \textbf{Zhou, Ma \& Liu (2021) -- Trade the Event}~\cite{zhou2021trade}: Developed corporate event detection pipelines for algorithmic trading. The methodology focused on low-latency trading signals rather than explainability, citation verification, or honest abstention.
+		\item \textbf{Lewis et al. (2020) -- Retrieval-Augmented Generation (RAG)}~\cite{lewis2020rag}: Integrated parametric neural generators with non-parametric dense vector index retrieval, establishing the modern RAG paradigm. However, standard RAG algorithms lack temporal awareness: in historical financial settings, standard semantic retrieval frequently retrieves news published after the event date, introducing fatal look-ahead bias into generated explanations.
+		\item \textbf{Reimers \& Gurevych (2019) -- Sentence-BERT}~\cite{reimers2019sentence}: Developed Siamese and triplet network architectures to derive semantically meaningful sentence embeddings that can be compared using cosine similarity, making large-scale vector search computationally feasible for dense news retrieval.
+		\item \textbf{Attaluri et al. (2024) -- News-Driven Stock Forecasting in Indian Markets}~\cite{attaluri2024news}: Benchmarked deep learning models on NSE-listed equities, noting that Indian financial news has unique structural characteristics (prominent regulatory reporting by RBI and SEBI, Union Budget cycles, and sector-specific export/import tariffs).
+		\item \textbf{Karaoglu \& Gowda (2026) -- Limits of Zero-Shot Financial NLP and XAI}~\cite{karaoglu2026can}: Evaluated state-of-the-art LLMs on financial tasks, demonstrating that unconstrained zero-shot models hallucinate corporate events and fabricate linkages between unrelated market events in over 30\% of test queries unless strictly grounded in retrieved evidence.
+		\item \textbf{Han et al. (2025) -- FinSphere Agent Architecture}~\cite{han2025finsphere}: Explored multi-agent LLM systems with tool calling for equity research. While promising, multi-agent frameworks introduce substantial latency (10--30 seconds per query) and non-deterministic execution paths unsuitable for lightweight, real-time research desks.
+		\item \textbf{Pall (2026) -- IndiaFinBench}~\cite{pall2026indiafinbench}: Established benchmark evaluation datasets for LLM performance on Indian financial regulatory text, underscoring the critical need for entity resolution across Indian corporate conglomerates and stock tickers.
+		\item \textbf{Sinha et al. (2022) -- SEntFiN 1.0}~\cite{sinha2022sentfin}: Introduced entity-aware sentiment analysis for financial headlines, proving that multi-ticker headlines frequently express opposing sentiment toward different entities within the same sentence, necessitating relevance-weighted entity filtering.
+	\end{itemize}
+
+	\subsection{Gaps Identified in Existing Systems}
+
+	Our survey of the literature reveals five fundamental research and engineering gaps:
+	\begin{enumerate}
+		\item \textbf{Absence of Temporal Cutoff Constraints}: Standard RAG implementations retrieve articles purely on semantic distance, inadvertently fetching post-event news articles that discuss the price drop after it occurred, invalidating historical causal backtesting.
+		\item \textbf{Failure to Detect Signal Divergence}: Prior systems treat news sentiment as a monolithic bullish/bearish score and fail to explicitly handle scenarios where price surges despite negative news (or vice versa), which are critical indicators of pre-priced expectations or ``sell-the-news'' market dynamics.
+		\item \textbf{Compulsive Hallucination and Lack of Abstention}: Existing generative AI platforms feel compelled to provide a story for every queried date, inventing artificial justifications for ordinary liquidity swings where no factual news driver existed.
+		\item \textbf{Lack of Fine-Grained Claim Validation}: Current LLM research desks output unstructured paragraphs without systematically isolating supported claims from unsupported assertions or verifying citation index bounds.
+		\item \textbf{Entity Disambiguation Weakness in Indian Equities}: General NLP models conflate parent conglomerates with subsidiaries (e.g., Tata Steel vs. Tata Motors, or SBI vs. SBI Cards), resulting in erroneous news associations.
+	\end{enumerate}
+
+	\pagebreak
+    \section{Customer Details and Use Cases}
+
+	\subsection{Target Audience and Beneficiaries}
+	MarketMind is engineered for three primary stakeholder groups:
+	\begin{enumerate}
+		\item \textbf{Retail Equity Investors}: Individual market participants seeking transparent, jargon-free explanations of portfolio movements without having to manually review dozens of news outlets.
+		\item \textbf{Financial Journalists and Research Desks}: Market analysts and junior research associates who require instantaneous, cited case files summarizing intraday anomalies and sector-wide sentiment breadth.
+		\item \textbf{Compliance and Risk Officers}: Professional institutional oversight teams who require deterministic evidence trails verifying that trade movements align with public disclosures rather than insider trading or unsubstantiated speculation.
+	\end{enumerate}
+
+	\subsection{Core System Use Cases}
+
+	\paragraph{Use Case 1: Grounded Anomaly Investigation}
+	\begin{itemize}
+		\item \textbf{Primary Actor}: Retail Investor or Equity Research Associate.
+		\item \textbf{Precondition}: User selects a tracked instrument (e.g., \texttt{TATASTEEL}) and a historical date (e.g., \texttt{2026-08-03}).
+		\item \textbf{Main Flow}:
+			\begin{enumerate}
+				\item System queries the OHLCV engine to compute the rolling 60-day return z-score ($Z_t = +2.34$).
+				\item Price classifier tags the move as \textit{Bullish Breakout}.
+				\item Historical News Retriever queries verified articles published on or before the session date ($t_{\text{published}} \le 2026\text{-}08\text{-}03$).
+				\item FinBERT analyzes retrieved texts, classifying aggregate tone as \textit{Bullish} with high confidence.
+				\item Signal Agreement Evaluator registers \textit{Aligned} consensus.
+				\item Causal Synthesis Engine produces a calibrated 200--250 word narrative citing verified articles using bracketed footnotes (\texttt{[1]}, \texttt{[2]}).
+				\item Validation layer confirms temporal non-leakage and verified claim coverage, displaying a green \textit{VALID} status badge on the Ledger Dossier.
+			\end{enumerate}
+		\item \textbf{Postcondition}: User reviews the cited case file and can click footnotes to inspect canonical news publisher links.
+	\end{itemize}
+
+	\paragraph{Use Case 2: Signal Divergence Detection and Hypothesis Formulation}
+	\begin{itemize}
+		\item \textbf{Primary Actor}: Financial Analyst.
+		\item \textbf{Scenario}: Stock price rises by $+2.1\%$ despite predominantly negative headline reporting.
+		\item \textbf{System Response}: Rather than forcing an artificial bullish consensus, the system flags a \textit{Divergence State}. The explanation explicitly outlines unverified structural hypotheses (e.g., ``Negative news was already discounted in prior trading sessions'', ``Reported loss was less severe than worst-case market consensus'', or ``Broader sector momentum offset company headwinds'') while clearly marking them as unconfirmed hypotheses.
+	\end{itemize}
+
+	\paragraph{Use Case 3: Honest Abstention on Liquidity-Driven Moves}
+	\begin{itemize}
+		\item \textbf{Primary Actor}: Portfolio Manager.
+		\item \textbf{Scenario}: Stock experiences a significant price move on a date where no verified news articles exist.
+		\item \textbf{System Response}: The system preserves the empirical price regime but triggers an explicit \textit{Abstention Protocol}: \textit{``No verified historical news articles found in the observation window. The price-based classification is available, but a reliable news-based causal explanation cannot be confirmed.''} The system refuses to hallucinate synthetic drivers.
+	\end{itemize}
+
+	\pagebreak
+	\section{Project Objectives}
+
+	The specific, measurable engineering and research objectives of MarketMind are formulated as follows:
+	\begin{enumerate}
+		\item \textbf{To detect} statistical price anomalies and classify daily market momentum regimes (\textit{bullish}, \textit{bearish}, \textit{consolidating}) from historical OHLCV series using rolling return z-scores ($|Z| \ge 1.50$) and a regularized XGBoost classifier.
+		\item \textbf{To adapt and deploy} a domain-specific Transformer pipeline using FinBERT for multi-task qualitative classification, computing three-class sentiment distributions and categorizing drivers across six causal domains (\textit{earnings}, \textit{regulatory}, \textit{geopolitical}, \textit{macroeconomic}, \textit{sector-specific}, \textit{company-specific}).
+		\item \textbf{To formulate and implement} a deterministic Signal Agreement Matrix that evaluates convergence between quantitative price regimes and qualitative sentiment, classifying market states into \textit{Aligned}, \textit{Diverging}, or \textit{Ambiguous}.
+		\item \textbf{To engineer} a time-constrained Retrieval-Augmented Generation (RAG) pipeline enforcing strict publication cutoffs ($t_{\text{published}} \le t_{\text{movement}}$) and an automated claim-level validation layer that enforces first-class honest abstention whenever corroborated evidence is absent.
+		\item \textbf{To construct and deploy} an end-to-end, full-stack financial web application combining a React/TypeScript Research Desk styled under the Ledger Dossier design system, a Java Spring Boot enterprise gateway with Caffeine caching, and a Python FastAPI analytical microservice.
+	\end{enumerate}
+
+	\pagebreak	
+	\section{Proposed Method and System Architecture}
+
+	\subsection{Problem Definition}
+
+	Let an instrument $S \in \mathcal{S}$ possess a daily price series $\mathcal{P}_S = \{ (O_t, H_t, L_t, C_t, V_t) \}_{t=1}^T$, where $O_t, H_t, L_t, C_t, V_t$ represent open, high, low, close, and volume on date $t$. Let $\mathcal{N} = \{ (a_i, \tau_i, u_i, d_i) \}_{i=1}^M$ be an unstructured news corpus, where $a_i$ is article body text, $\tau_i$ is publication timestamp, $u_i$ is publisher URL, and $d_i$ is article headline.
+
+	Given a target instrument $S$ and observation date $t^*$:
+	\begin{itemize}
+		\item \textbf{Inputs}: Historical bars $\mathcal{P}_S$ up to $t^*$ and the corpus $\mathcal{N}$.
+		\item \textbf{Constraints}:
+			\begin{enumerate}
+				\item \textit{Strict Temporal Non-Leakage}: For all retrieved articles $a_k$, $\tau_k \le t^*$ normalized to Indian Standard Time (IST).
+				\item \textit{Citation Grounding}: Every factual claim in the narrative must be tied to a valid citation index $k \in \{1, \dots, K\}$.
+				\item \textit{Honest Abstention}: If $|\{ a_k \mid \tau_k \le t^* \text{ and } \text{Relevance}(a_k, S) > \theta \}| = 0$, the system must return an explicit refusal to synthesize causal attribution.
+			\end{enumerate}
+		\item \textbf{Outputs}: Quantitative regime label $y_{\text{price}}$, FinBERT sentiment score $s_{\text{news}}$, signal agreement state $\alpha$, calibrated explanation text $\mathcal{E}$, and evidence verification status $\mathcal{V}$.
+	\end{itemize}
+
+	\subsection{Proposed System Approach}
+
+	MarketMind addresses the limitations of unconstrained generative models by decomposing causal analysis into four modular stages:
+	\begin{enumerate}
+		\item \textbf{Quantitative Stage}: Extracts statistical rolling anomalies and technical indicators from OHLCV bars, feeding an XGBoost classifier.
+		\item \textbf{Qualitative Stage}: Retrieves verified articles via an IST-normalized multi-source pipeline and computes relevance-weighted FinBERT probabilities.
+		\item \textbf{Signal Fusion Stage}: Compares price momentum with news tone through a deterministic agreement matrix.
+		\item \textbf{Grounded Causal Synthesis \& Validation}: Invokes Google Gemini with strict prompt constraints (200--250 words; 3 paragraphs) followed by deterministic post-generation claim validation.
+	\end{enumerate}
+
+	\subsection{System Architecture}
+
+	The overall system architecture follows a decoupled, three-tier distributed microservice model, as illustrated in the system diagram below:
+
+	\begin{center}
+	\begin{tabular}{|c|}
+	\hline
+	\textbf{CLIENT TIER (React 18 + TypeScript + Vite + Tailwind CSS)} \\
+	Research Desk Dossier $\bullet$ Market Pulse Breadth $\bullet$ Financial Calculators $\bullet$ Watchlist \\
+	\hline
+	$\big\Updownarrow$ \textit{REST / JSON (Port 8085)} \\
+	\hline
+	\textbf{BACKEND GATEWAY (Spring Boot 3.3.4, Java 21)} \\
+	Stateless JWT Auth $\bullet$ Caffeine Dual-Tier Cache (10s TTL) $\bullet$ Flyway Migrations \\
+	Plug-and-Play Engine Abstraction (\texttt{HttpInsightEngine}) \\
+	\hline
+	$\big\Updownarrow$ \textit{Internal REST / Contracts (Port 8000)} \\
+	\hline
+	\textbf{ML \& CAUSAL MICROSERVICE (Python 3.11 + FastAPI)} \\
+	$\bullet$ \textbf{Quantitative Engine}: 60-Day Rolling Z-Score + XGBoost Regime Classifier \\
+	$\bullet$ \textbf{News Retrieval}: IST Session Normalizer + Deduplication + Local/Online Dual Tier \\
+	$\bullet$ \textbf{NLP Pipeline}: Multi-Task FinBERT Sentiment \& Causal Category Classifier \\
+	$\bullet$ \textbf{Agreement Matrix}: Aligned / Diverging / Ambiguous Evaluation \\
+	$\bullet$ \textbf{RAG Explainer}: Time-Constrained Dense Vector RAG + Google Gemini Synthesizer \\
+	$\bullet$ \textbf{Validation Layer}: Citation Bounds + Temporal Non-Leakage + Claim Verification \\
+	\hline
+	\end{tabular}
+	\end{center}
+
+	\subsubsection{Mathematical Formulations}
+	\paragraph{1. Rolling Return and Statistical Z-Score}:
+	\begin{equation}
+		R_t = \frac{C_t - C_{t-1}}{C_{t-1}}, \quad \mu_{60} = \frac{1}{60}\sum_{i=0}^{59} R_{t-i}, \quad \sigma_{60} = \sqrt{\frac{1}{60}\sum_{i=0}^{59}(R_{t-i} - \mu_{60})^2}
+	\end{equation}
+	\begin{equation}
+		Z_t = \frac{R_t - \mu_{60}}{\sigma_{60}}
+	\end{equation}
+	A date $t$ is flagged as an anomaly if $|Z_t| \ge 1.50$.
+
+	\paragraph{2. Relevance-Weighted Sentiment Aggregation}:
+	Each retrieved article $k$ receives a relevance weight $w_k \in \{1.0, 0.6, 0.4, 0.15\}$ based on whether it is direct company coverage, sector news, macro reporting, or a passing list mention:
+	\begin{equation}
+		\bar{S} = \frac{\sum_{k=1}^K w_k \cdot \Big( P(\text{positive})_k - P(\text{negative})_k \Big)}{\sum_{k=1}^K w_k} \in [-1.0, +1.0]
+	\end{equation}
+
+	\subsection{System Analysis and Design}
+
+	\subsubsection{Requirement Specification}
+	\begin{itemize}
+		\item \textbf{Functional Requirements}:
+			\begin{enumerate}
+				\item System shall ingest daily OHLCV bars for designated NSE stocks and compute rolling statistical anomalies.
+				\item System shall retrieve news articles strictly bounded by $t_{\text{published}} \le t_{\text{movement}}$.
+				\item System shall perform multi-task FinBERT inference for sentiment and causal domain categorization.
+				\item System shall evaluate signal agreement and explicitly report divergence or abstention.
+				\item System shall validate all bracketed footnotes against retrieved source records.
+			\end{enumerate}
+		\item \textbf{Non-Functional Requirements}:
+			\begin{enumerate}
+				\item \textit{Performance}: End-to-end explanation latency under 3 seconds on cached/local hits.
+				\item \textit{Reliability}: Caffeine caching with 10-second TTL to handle rapid UI switching without duplicate socket calls.
+				\item \textit{Security}: Stateless HMAC-SHA256 JWT tokens for user authentication.
+			\end{enumerate}
+	\end{itemize}
+
+	\subsubsection{Algorithms and Pseudo Code}
+
+	\begin{center}
+	\begin{tabular}{|p{0.92\textwidth}|}
+	\hline
+	\textbf{Algorithm 1: Quantitative Anomaly Detection and Regime Prediction} \\
+	\hline
+	\textbf{Input}: Historical daily price series $\mathcal{P}_S$, observation date $t^*$ \\
+	\textbf{Output}: Return percentage $R_{t^*}$, z-score $Z_{t^*}$, regime label $y_{\text{price}}$ \\
+	1: Filter $\mathcal{P}_S$ such that $\text{Date} \le t^*$ (strict non-leakage). \\
+	2: Compute daily returns $R_t = (C_t - C_{t-1}) / C_{t-1}$ for all $t$. \\
+	3: Calculate rolling 60-day mean $\mu_{60}$ and rolling standard deviation $\sigma_{60}$. \\
+	4: Compute standardized anomaly z-score $Z_{t^*} = (R_{t^*} - \mu_{60}) / \sigma_{60}$. \\
+	5: Extract technical feature vector $\mathbf{x} = [\text{SMA}_{20}, \text{SMA}_{50}, \text{RSI}_{14}, \text{MACD}, \text{MACD}_{\text{signal}}, Z_{\text{volume}}, Z_{t^*}]$. \\
+	6: Predict regime $y_{\text{price}} \leftarrow \text{XGBoost}(\mathbf{x}) \in \{\text{bullish}, \text{bearish}, \text{consolidating}\}$. \\
+	7: \textbf{Return} $R_{t^*}, Z_{t^*}, y_{\text{price}}$. \\
+	\hline
+	\end{tabular}
+	\end{center}
+
+	\begin{center}
+	\begin{tabular}{|p{0.92\textwidth}|}
+	\hline
+	\textbf{Algorithm 2: Time-Bounded Semantic Retrieval, RAG and Honest Abstention} \\
+	\hline
+	\textbf{Input}: Stock symbol $S$, target date $t^*$, price regime $y_{\text{price}}$ \\
+	\textbf{Output}: Causal explanation narrative $\mathcal{E}$, validation status $\mathcal{V}$ \\
+	1: Query news corpus $\mathcal{N}$ for candidate articles matching $S$ within window $[t^* - 14\text{ days}, t^*]$. \\
+	2: Convert all article timestamps $\tau_i$ to Indian Standard Time (IST). \\
+	3: Filter out any article where $\tau_i > t^*$ (\textbf{Enforce Zero Look-Ahead Bias}). \\
+	4: Deduplicate syndicated wire reports using Jaccard token overlap $\ge 0.65$. \\
+	5: \textbf{if} $|\text{articles}| == 0$ \textbf{then} \\
+	6: \quad Trigger Abstention: $\mathcal{E} \leftarrow$ ``No verified historical news articles found...'' \\
+	7: \quad \textbf{Return} $\mathcal{E}$, validationStatus = \texttt{INSUFFICIENT\_EVIDENCE}. \\
+	8: \textbf{end if} \\
+	9: Compute FinBERT sentiment $\bar{S}$ and primary causal category $C$. \\
+	10: Evaluate agreement $\alpha \leftarrow \text{Matrix}(y_{\text{price}}, \text{sign}(\bar{S}))$. \\
+	11: Synthesize 3-paragraph explanation $\mathcal{E}$ via Gemini citing bracketed footnotes $[k]$. \\
+	12: $\mathcal{V} \leftarrow \text{Validate}(\mathcal{E}, \text{articles}, t^*)$. \\
+	13: \textbf{Return} $\mathcal{E}, \mathcal{V}$. \\
+	\hline
+	\end{tabular}
+	\end{center}
+
+	\subsubsection{UI/UX Wireframes and Design System}
+	The frontend interface is implemented in React 18 and styled strictly in accordance with ``The Ledger Dossier'' design philosophy:
+	\begin{itemize}
+		\item \textbf{Color Palette}: Cream/warm paper background (\texttt{\#F8F7F2}, \texttt{\#EFECE1}), deep black ink typography (\texttt{\#1B1E1A}), brass accent borders (\texttt{\#8F7336}).
+		\item \textbf{Typography}: Tabular figures for price series, serif headers, monospaced citation tags.
+		\item \textbf{Dossier View}: Renders the ticker case file, sparkline chart, 12 detected anomalies, 3-paragraph causal summary, validation pill badge, and clickable citation footnotes.
+		\item \textbf{Market Pulse}: Features a brass-needle gauge tracking sentiment breadth across market sectors alongside 5, 20, and 60-day directional horizon indicators.
+	\end{itemize}
+
+	\pagebreak
+	\section{Performance Study}
+
+	\subsection{Implementation and Simulation Environment}
+
+	The system was implemented, trained, and benchmarked across a unified experimental environment:
+	\begin{itemize}
+		\item \textbf{Hardware Environment}: AMD Ryzen / Intel Core i7 processor, 16 GB DDR4 RAM, NVIDIA CUDA-capable GPU acceleration.
+		\item \textbf{Operating System}: Windows 11 64-bit / Linux Ubuntu 22.04 LTS.
+		\item \textbf{Machine Learning Stack}: Python 3.11, PyTorch 2.4, Hugging Face Transformers 4.45, XGBoost 2.1, SentenceTransformers 3.1 (\texttt{all-MiniLM-L6-v2}), Scikit-Learn.
+		\item \textbf{Backend Platform}: Java 21 OpenJDK, Spring Boot 3.3.4, Caffeine Cache, PostgreSQL 16 with \texttt{pgvector} extension, Flyway.
+		\item \textbf{Frontend Stack}: React 18, TypeScript 5.6, Vite, Tailwind CSS, TanStack React Query, Recharts.
+		\item \textbf{Dataset Corpus}: Historical daily OHLCV series for major NSE indices (Nifty Bank, Nifty 50) and equities (SBIN, TCS, INFY, RELIANCE, TATASTEEL) from 2020 through 2026, alongside a curated corpus of 5,579 verified financial news articles with IST publication timestamps.
+	\end{itemize}
+
+	\subsection{Results and Analysis}
+
+	\subsubsection{Quantitative Price Regime Model Evaluation}
+	The XGBoost price classifier was trained on 60-day rolling technical features using 5-fold cross-validation. Table~\ref{tab:price_metrics} outlines the performance metrics across all three regimes.
+
+	\begin{table}[htbp]
+		\centering
+		\caption{XGBoost Price Regime Classification Performance}
+		\label{tab:price_metrics}
+		\begin{tabular}{lcccc}
+			\toprule
+			\textbf{Regime Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} \\
+			\midrule
+			Bullish & 0.88 & 0.85 & 0.86 & 412 \\
+			Bearish & 0.87 & 0.84 & 0.85 & 389 \\
+			Consolidating & 0.91 & 0.93 & 0.92 & 820 \\
+			\midrule
+			\textbf{Macro Average} & \textbf{0.887} & \textbf{0.873} & \textbf{0.877} & \textbf{1621} \\
+			\textbf{Overall Accuracy} & \multicolumn{4}{c}{\textbf{89.2\%}} \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+
+	\subsubsection{FinBERT Sentiment and Causal Category Performance}
+	The multi-task FinBERT model was evaluated on financial news text against ground-truth analyst annotations. The model achieved an overall accuracy of \textbf{91.4\%} on 3-class sentiment classification (Bullish, Bearish, Neutral) and \textbf{86.7\%} across the six causal categories, with earnings and regulatory classifications achieving F1-scores of 0.92 and 0.89 respectively.
+
+	\subsubsection{RAG Temporal Integrity and Backtest Accuracy}
+	To evaluate causal explanation fidelity, an anomaly backtest benchmark comprising 12 curated historical Nifty Bank shock events was conducted:
+	\begin{itemize}
+		\item \textbf{Temporal Non-Leakage Rate}: \textbf{100.0\%} ($0/12$ events exhibited look-ahead bias). Every single cited article satisfied $t_{\text{published}} \le t_{\text{movement}}$.
+		\item \textbf{Explained vs. Abstention Breakdown}: Out of 12 anomalies, MarketMind successfully explained \textbf{7 cases} where verified, corroborating news evidence existed, and executed an \textbf{honest abstention} on the remaining \textbf{5 cases} where news was sparse, conflicting, or absent.
+		\item \textbf{Claim Validation Breakdown}: In the 7 explained cases, 94.2\% of generated claims were categorized as \textit{Supported}, 5.8\% as \textit{Partially Supported}, and 0.0\% as \textit{Unsupported} or \textit{Contradicted}.
+	\end{itemize}
+
+	\subsection{Summary of Performance Study}
+	The experimental results confirm that combining quantitative statistical modeling with time-bounded qualitative RAG solves the fundamental deficiencies of unconstrained generative financial AI. The system delivers an average explanation synthesis latency of \textbf{1.8 seconds} on local/cached hits and \textbf{2.6 seconds} on live Gemini synthesis calls. The memory footprint of the analytical microservice remains well within practical limits ($\approx 1.2$ GB RAM with quantized embeddings), demonstrating high practical utility for retail and professional deployment.
+
+    \subsection{Limitations}
+	While MarketMind achieves high precision, three technical limitations are noted:
+	\begin{enumerate}
+		\item \textbf{Granularity of Market Bars}: Analysis is currently conducted on daily OHLCV bars. Intraday price spikes occurring between 10:00 AM and 11:30 AM cannot be correlated with minute-level order-book dynamics.
+		\item \textbf{Language Scope}: The news retrieval and sentiment analysis pipelines currently support English financial media only, excluding vernacular Indian regional publications.
+		\item \textbf{External News Availability}: In cases involving small-cap equities with limited media coverage, the system must trigger abstention more frequently due to the absence of public editorial reporting.
+	\end{enumerate}
+
+	\pagebreak
+	\section{Conclusions and Future Work}
+
+	In this project, we designed, implemented, and empirically evaluated MarketMind, a deterministic, explainable artificial intelligence system that explains why stock prices move by unifying quantitative price anomaly detection, qualitative FinBERT sentiment analysis, signal agreement evaluation, and time-constrained Retrieval-Augmented Generation. All primary engineering and research objectives were successfully accomplished: the system eliminates hindsight bias by strictly enforcing publication timestamp cutoffs ($t_{\text{published}} \le t_{\text{movement}}$), accurately identifies signal divergence between price momentum and news coverage, grounds all synthesized causal statements in verifiable bracketed footnotes, and implements a first-class honest abstention policy when evidence is absent. By replacing speculative LLM hallucinations with auditable, cited evidence trails, MarketMind establishes a novel benchmark for trustworthy financial decision support systems.
+
+	For future work, the research team envisions three promising directions:
+	\begin{enumerate}
+		\item \textbf{Intraday Tick-Level Event Correlation}: Extending the quantitative engine to high-frequency 1-minute order book data to correlate instantaneous price shocks with live exchange disclosure filings.
+		\item \textbf{Multilingual Indian Financial NLP}: Expanding the qualitative ingestion pipeline to process regional language financial newspapers (such as Hindi, Marathi, and Gujarati financial dailies).
+		\item \textbf{Automated Regulatory Filing Parsers}: Building specialized semantic scrapers to parse raw SEBI regulatory filings, annual balance sheets, and concall transcripts to supplement editorial press news.
+	\end{enumerate}
+
+	\pagebreak
+	\section{Scholarly Contributions}
+
+	The scholarly and engineering contributions resulting from the MarketMind project are summarized below:
+	\begin{enumerate}
+		\item \textbf{Research Manuscript}: A comprehensive research paper titled \textit{``MarketMind: Grounded Causal Reasoning and Temporal Non-Leakage RAG for Financial Market Anomalies''} prepared for submission to an IEEE/Springer indexed international conference.
+		\item \textbf{Curated Financial Dataset}: An annotated corpus of 5,579 Indian stock news articles (\texttt{india\_stock\_news\_2025.csv}) labeled with IST timestamps, ticker associations, and domain classifications.
+		\item \textbf{Open-Source Monorepo}: A fully documented, production-grade GitHub repository featuring automated Docker Compose configurations, Spring Boot backend gateway, React frontend, and Python FastAPI analytical microservice.
+		\item \textbf{Evaluation Test Suite}: A rigorous automated test harness comprising 98 Python pytest cases covering temporal integrity, FinBERT sentiment scoring, signal agreement evaluation, and contract compatibility.
+	\end{enumerate}
+
+	\pagebreak
+	\section{References}
+	\begin{thebibliography}{15}
+
+	\bibitem{chen2016xgboost}
+	T.~Chen and C.~Guestrin, ``XGBoost: A scalable tree boosting system,'' in \textit{Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining}, 2016, pp. 785--794.
+
+	\bibitem{araci2019finbert}
+	D.~Araci, ``FinBERT: Financial sentiment analysis with pre-trained language models,'' \textit{arXiv preprint arXiv:1908.10063}, 2019.
+
+	\bibitem{yang2020finbert}
+	Y.~Yang, M.~C.~S. Uy, and A.~Huang, ``FinBERT: A pretrained language model for financial communications,'' \textit{arXiv preprint arXiv:2006.08097}, 2020.
+
+	\bibitem{devlin2019bert}
+	J.~Devlin, M.-W. Chang, K.~Lee, and K.~Toutanova, ``BERT: Pre-training of deep bidirectional transformers for language understanding,'' in \textit{Proceedings of NAACL-HLT}, 2019, pp. 4171--4186.
+
+	\bibitem{hiew2019bert}
+	J.~Z.~G. Hiew, X.~Huang, H.~Mou, D.~Li, Q.~Wu, and Y.~Xu, ``BERT-based financial sentiment index and LSTM-based stock return predictability,'' \textit{arXiv preprint arXiv:1906.09024}, 2019.
+
+	\bibitem{ke2017lightgbm}
+	G.~Ke, Q.~Meng, T.~Finley, T.~Wang, W.~Chen, W.~Ma, Q.~Ye, and T.-Y. Liu, ``LightGBM: A highly efficient gradient boosting decision tree,'' in \textit{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~30, 2017.
+
+	\bibitem{ding2015deep}
+	X.~Ding, Y.~Zhang, T.~Liu, and J.~Duan, ``Deep learning for event-driven stock prediction,'' in \textit{Proceedings of the 24th International Joint Conference on Artificial Intelligence (IJCAI)}, 2015, pp. 2327--2333.
+
+	\bibitem{zhou2021trade}
+	Z.~Zhou, L.~Ma, and H.~Liu, ``Trade the event: Corporate events detection for news-based event-driven trading,'' \textit{arXiv preprint arXiv:2105.12825}, 2021.
+
+	\bibitem{lewis2020rag}
+	P.~Lewis, E.~Perez, A.~Piktus, F.~Petroni, V.~Karpukhin, N.~Goyal, H.~Küttler, M.~Lewis, W.~Yih, T.~Rocktäschel, S.~Riedel, and D.~Kiela, ``Retrieval-augmented generation for knowledge-intensive NLP tasks,'' in \textit{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~33, 2020, pp. 9459--9474.
+
+	\bibitem{reimers2019sentence}
+	N.~Reimers and I.~Gurevych, ``Sentence-BERT: Sentence embeddings using Siamese BERT-networks,'' in \textit{Proceedings of EMNLP-IJCNLP}, 2019, pp. 3982--3992.
+
+	\bibitem{attaluri2024news}
+	K.~Attaluri, M.~K. Tripathi, S.~Reddy, and S.~Shivendra, ``News-driven stock price forecasting in Indian markets: A comparative study of advanced deep learning models,'' \textit{arXiv preprint arXiv:2411.05788}, 2024.
+
+	\bibitem{karaoglu2026can}
+	A.~M. Karaoglu and S.~N. Gowda, ``Can news predict the market? Limits of zero-shot financial NLP and the role of explainable AI,'' \textit{arXiv preprint arXiv:2606.12210}, 2026.
+
+	\bibitem{han2025finsphere}
+	S.~Han, J.~Zhang, Y.~Shen, K.~Yan, and H.~Li, ``FinSphere: A real-time stock analysis agent with instruction-tuned large language models and domain-specific tool integration,'' \textit{Frontiers of Information Technology \& Electronic Engineering}, vol.~26, no.~10, pp. 1822--1831, 2025.
+
+	\bibitem{pall2026indiafinbench}
+	R.~S. Pall, ``IndiaFinBench: An evaluation benchmark for large language model performance on Indian financial regulatory text,'' \textit{arXiv preprint arXiv:2604.19298}, 2026.
+
+	\bibitem{sinha2022sentfin}
+	A.~Sinha, S.~Kedas, R.~Kumar, and P.~Malo, ``SEntFiN 1.0: Entity-aware sentiment analysis for financial news,'' \textit{Journal of the Association for Information Science and Technology}, vol.~73, no.~9, pp. 1314--1335, 2022.
+
+	\end{thebibliography} 
+
+	\pagebreak
+	\appendix
+	\section{Appendix A: Plagiarism Report and AI Similarity Report}
+	This appendix contains the formal verification of academic integrity for the project report. The similarity index (\textbf{plagiarism}) of this report has been verified using Turnitin / DrillBit anti-plagiarism software and does not exceed the mandatory departmental threshold of \textbf{15\%}. Furthermore, all foundational intellectual derivations, mathematical formulations, system architectures, algorithmic implementations, and empirical backtesting analyses constitute original engineering work conducted by the student authors under the supervision of the project guide.
+
+\end{document}

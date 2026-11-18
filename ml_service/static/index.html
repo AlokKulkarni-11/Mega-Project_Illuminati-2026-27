@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MarketMind — Natural-Language Stock News Analysis</title>
+  <meta name="description" content="Explainable AI Stock Movement & Causal Reasoning System powered by FinBERT and Time-Constrained RAG.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at 50% 0%, #171d34 0%, #0c0f1d 70%, #070912 100%);
+      --surface-glass: rgba(22, 27, 46, 0.75);
+      --surface-border: rgba(255, 255, 255, 0.08);
+      --surface-hover: rgba(32, 40, 68, 0.85);
+      --accent-blue: #3b82f6;
+      --accent-cyan: #06b6d4;
+      --accent-indigo: #6366f1;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --bullish: #10b981;
+      --bearish: #ef4444;
+      --neutral: #f59e0b;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --glow-blue: 0 0 25px rgba(59, 130, 246, 0.25);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    header {
+      padding: 1.5rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--surface-border);
+      backdrop-filter: blur(16px);
+      background: rgba(10, 13, 24, 0.7);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .logo-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-indigo));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: white;
+      box-shadow: var(--glow-blue);
+    }
+
+    .brand-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #ffffff, #93c5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+    }
+
+    main {
+      flex: 1;
+      max-width: 1180px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+
+    .hero-section {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-title {
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, #ffffff 40%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 680px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    .search-container {
+      background: var(--surface-glass);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.25rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), var(--glow-blue);
+      backdrop-filter: blur(20px);
+      margin-bottom: 1.25rem;
+      transition: border-color 0.2s;
+    }
+
+    .search-container:focus-within {
+      border-color: rgba(59, 130, 246, 0.6);
+    }
+
+    .search-form {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .search-icon {
+      color: var(--accent-blue);
+      font-size: 1.3rem;
+    }
+
+    .search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 1.15rem;
+      font-weight: 400;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .btn-search {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-indigo));
+      color: white;
+      border: none;
+      padding: 0.85rem 1.75rem;
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.35);
+    }
+
+    .btn-search:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+    }
+
+    .btn-search:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .suggestions-container {
+      margin-bottom: 2.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .suggestions-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .suggestion-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .suggestion-chip:hover {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.3);
+      color: #93c5fd;
+      transform: translateY(-1px);
+    }
+
+    /* Modal / Clarification Card */
+    .clarification-modal {
+      display: none;
+      background: rgba(30, 27, 75, 0.9);
+      border: 1px solid rgba(147, 51, 234, 0.4);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(168, 85, 247, 0.2);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .clarification-modal.active {
+      display: block;
+    }
+
+    .clarification-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .clarification-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #e9d5ff;
+    }
+
+    .clarification-body {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .clarification-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn-clarify-opt {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+
+    .btn-clarify-opt:hover {
+      background: var(--accent-blue);
+      border-color: var(--accent-blue);
+    }
+
+    /* Loading Spinner */
+    .loading-state {
+      display: none;
+      text-align: center;
+      padding: 3.5rem 1rem;
+    }
+
+    .loading-state.active {
+      display: block;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(59, 130, 246, 0.15);
+      border-top-color: var(--accent-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1.25rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Results Dashboard Grid */
+    .results-dashboard {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .results-dashboard.active {
+      display: block;
+    }
+
+    .interpretation-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--surface-glass);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .interpretation-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #cbd5e1;
+    }
+
+    .tag-highlight {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.3);
+      color: #60a5fa;
+      font-weight: 600;
+    }
+
+    /* Aggregate Corpus Sentiment Hero Banner */
+    .agg-sentiment-hero {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .agg-hero-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+
+    .agg-hero-main {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .agg-hero-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+
+    .agg-hero-right {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .prob-chip {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot-pos { width: 8px; height: 8px; border-radius: 50%; background: var(--bullish); }
+    .dot-neu { width: 8px; height: 8px; border-radius: 50%; background: var(--neutral); }
+    .dot-neg { width: 8px; height: 8px; border-radius: 50%; background: var(--bearish); }
+
+    /* Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .metric-card {
+      background: var(--surface-glass);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      backdrop-filter: blur(12px);
+    }
+
+    .metric-title {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-value {
+      font-size: 1.85rem;
+      font-weight: 700;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .metric-sub {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* Sentiment Spectrum Bar */
+    .sentiment-bar-track {
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      margin: 12px 0 6px;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .bar-pos { background: var(--bullish); }
+    .bar-neu { background: var(--neutral); }
+    .bar-neg { background: var(--bearish); }
+
+    /* Explanation Breakdown (4 Parts) */
+    .explanation-panel {
+      background: var(--surface-glass);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    .explanation-section-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .explanation-block {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .explanation-block:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .block-heading {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #93c5fd;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .block-content {
+      color: #e2e8f0;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .limitation-box {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin-top: 1rem;
+      color: #fde68a;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    /* Citations / Supporting Articles Table */
+    .citations-panel {
+      background: var(--surface-glass);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+    }
+
+    .citations-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .citations-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .article-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .article-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-md);
+      padding: 1.15rem;
+      transition: all 0.2s ease;
+    }
+
+    .article-card:hover {
+      background: var(--surface-hover);
+      border-color: rgba(59, 130, 246, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .article-title-link {
+      color: #f8fafc;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.05rem;
+      line-height: 1.4;
+      display: inline-block;
+      margin-bottom: 0.4rem;
+    }
+
+    .article-title-link:hover {
+      color: #60a5fa;
+      text-decoration: underline;
+    }
+
+    .article-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .badge-sentiment {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-positive { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .badge-negative { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    .badge-neutral { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+
+    .article-snippet {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    footer {
+      border-top: 1px solid var(--surface-border);
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="/" class="brand">
+      <div class="logo-badge">M</div>
+      <div>
+        <div class="brand-title">MarketMind</div>
+        <div class="brand-subtitle">Natural-Language Stock Intelligence</div>
+      </div>
+    </a>
+    <div class="header-links">
+      <span class="badge-status">
+        <span class="status-dot"></span>
+        FinBERT Microservice Online
+      </span>
+      <a href="/docs" target="_blank" style="color: var(--text-secondary); text-decoration: none; font-size: 0.85rem;">API Docs</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero-section">
+      <h1 class="hero-title">Ask Why a Stock Moved in Plain English</h1>
+      <p class="hero-subtitle">
+        Enter natural-language questions to analyze historical news, detect market sentiment with FinBERT, and generate evidence-grounded causal explanations.
+      </p>
+    </section>
+
+    <!-- Search Form -->
+    <div class="search-container">
+      <form id="search-form" class="search-form" onsubmit="handleQuerySubmit(event)">
+        <span class="search-icon">🔍</span>
+        <input
+          id="query-input"
+          class="search-input"
+          type="text"
+          placeholder="Ask why a stock moved or analyze its historical news..."
+          autocomplete="off"
+          required
+        />
+        <button id="btn-submit" type="submit" class="btn-search">
+          Analyze Query
+        </button>
+      </form>
+    </div>
+
+    <!-- Suggestions List -->
+    <div class="suggestions-container">
+      <span class="suggestions-label">Try asking:</span>
+      <button class="suggestion-chip" onclick="setQuery('Why is TCS stock dropping in mid March?')">
+        Why is TCS stock dropping in mid March?
+      </button>
+      <button class="suggestion-chip" onclick="setQuery('Analyze Infosys news during the last two weeks of January 2026.')">
+        Analyze Infosys news during the last two weeks of January 2026.
+      </button>
+      <button class="suggestion-chip" onclick="setQuery('What caused the decline in Reliance stock during March 2025?')">
+        What caused the decline in Reliance stock during March 2025?
+      </button>
+      <button class="suggestion-chip" onclick="setQuery('Show positive and negative news about NVIDIA in the first week of August.')">
+        Show positive and negative news about NVIDIA in the first week of August.
+      </button>
+      <button class="suggestion-chip" onclick="setQuery('Find negative news about HDFC Bank during the second week of June 2025.')">
+        Find negative news about HDFC Bank during the second week of June 2025.
+      </button>
+    </div>
+
+    <!-- Clarification Modal -->
+    <div id="clarification-modal" class="clarification-modal">
+      <div class="clarification-header">
+        <span style="font-size: 1.5rem;">⚠️</span>
+        <h3 id="clarification-title" class="clarification-title">Clarification Needed</h3>
+      </div>
+      <p id="clarification-message" class="clarification-body"></p>
+      <div id="clarification-buttons" class="clarification-controls"></div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-state" class="loading-state">
+      <div class="spinner"></div>
+      <p id="loading-message" style="font-size: 1.1rem; font-weight: 500; color: #93c5fd;">
+        Understanding natural language query...
+      </p>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px;">
+        Retrieving historical news & evaluating FinBERT sentiment probabilities
+      </p>
+    </div>
+
+    <!-- Results Dashboard -->
+    <div id="results-dashboard" class="results-dashboard">
+      <!-- Query Interpretation Bar -->
+      <div class="interpretation-bar">
+        <div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">Detected Stock & Window:</div>
+          <div class="interpretation-tags" id="interpretation-tags"></div>
+        </div>
+        <button class="suggestion-chip" onclick="toggleEditInterpretation()" id="btn-edit-interpretation">
+          ✏️ Edit Stock / Dates
+        </button>
+      </div>
+
+      <!-- Hero Aggregate Sentiment Banner for Whole News Corpus -->
+      <div class="agg-sentiment-hero" id="agg-sentiment-hero">
+        <div>
+          <div class="agg-hero-label">Aggregate Sentiment of Whole News Set</div>
+          <div class="agg-hero-main">
+            <span id="agg-hero-badge" class="badge-sentiment badge-neutral" style="font-size: 1.15rem; padding: 6px 16px; border-radius: 8px;">NEUTRAL</span>
+            <span id="agg-hero-score" style="font-size: 2rem; font-weight: 800; color: #f8fafc;">0.00</span>
+          </div>
+          <div class="agg-hero-sub" id="agg-hero-sub">
+            Evaluated across 0 articles using FinBERT probability aggregation
+          </div>
+        </div>
+        <div class="agg-hero-right" id="agg-hero-probabilities">
+          <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 2px;">Weighted Aggregate (Relevance × Conf)</div>
+          <div class="prob-chip"><span class="dot-pos"></span> Weighted P(Bullish): <strong id="weighted-prob-pos" style="color: #6ee7b7; margin-left: auto;">0.0%</strong></div>
+          <div class="prob-chip"><span class="dot-neu"></span> Weighted P(Neutral): <strong id="weighted-prob-neu" style="color: #fde68a; margin-left: auto;">0.0%</strong></div>
+          <div class="prob-chip"><span class="dot-neg"></span> Weighted P(Bearish): <strong id="weighted-prob-neg" style="color: #fca5a5; margin-left: auto;">0.0%</strong></div>
+          <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 4px;" id="unweighted-prob-note">
+            Simple Mean: Pos <span id="mean-prob-pos">0.0%</span> • Neu <span id="mean-prob-neu">0.0%</span> • Neg <span id="mean-prob-neg">0.0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metrics Grid -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-title">Aggregate Sentiment Score</div>
+          <div class="metric-value" id="sentiment-score-val">0.00</div>
+          <div class="sentiment-bar-track">
+            <div id="bar-pos" class="bar-pos" style="width: 33%;"></div>
+            <div id="bar-neu" class="bar-neu" style="width: 34%;"></div>
+            <div id="bar-neg" class="bar-neg" style="width: 33%;"></div>
+          </div>
+          <div class="metric-sub" id="sentiment-score-sub">mean(P(pos) - P(neg)) in [-1, +1]</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-title">Sentiment Distribution</div>
+          <div class="metric-value" id="sentiment-dist-val">0 Articles</div>
+          <div class="metric-sub" id="sentiment-dist-sub">
+            <span style="color: var(--bullish);">0 Pos</span> •
+            <span style="color: var(--neutral);">0 Neu</span> •
+            <span style="color: var(--bearish);">0 Neg</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-title">Identified Intent</div>
+          <div class="metric-value" style="font-size: 1.35rem; color: #a7f3d0;" id="intent-val">
+            Sentiment Analysis
+          </div>
+          <div class="metric-sub" id="topic-tags"></div>
+        </div>
+      </div>
+
+      <!-- 4-Part Evidence Explanation Panel -->
+      <div class="explanation-panel">
+        <div class="explanation-section-title">
+          <span>🧠 Evidence-Grounded Explanation</span>
+        </div>
+
+        <!-- 1. Observed Price Movement -->
+        <div class="explanation-block">
+          <div class="block-heading">
+            <span>📈 1. Observed Stock-Price Movement:</span>
+          </div>
+          <div class="block-content" id="exp-price-movement"></div>
+        </div>
+
+        <!-- 2. Negative News Found -->
+        <div class="explanation-block">
+          <div class="block-heading">
+            <span>📰 2. News Identified During Period:</span>
+          </div>
+          <div class="block-content" id="exp-news-found"></div>
+        </div>
+
+        <!-- 3. Potential Explanations -->
+        <div class="explanation-block">
+          <div class="block-heading">
+            <span>🔍 3. Potential Explanations Supported by Articles:</span>
+          </div>
+          <div class="block-content" id="exp-potential-causes"></div>
+        </div>
+
+        <!-- 4. Uncertainty & Limitations -->
+        <div class="explanation-block">
+          <div class="block-heading">
+            <span>🛡️ 4. Missing Evidence & Causality Disclaimers:</span>
+          </div>
+          <div class="block-content" id="exp-limitations"></div>
+        </div>
+      </div>
+
+      <!-- Supporting Articles / Citations -->
+      <div class="citations-panel">
+        <div class="citations-header">
+          <div class="citations-title">📚 Supporting Articles & Verified Citations</div>
+          <span style="font-size: 0.85rem; color: var(--text-muted);" id="citations-count">0 Citations</span>
+        </div>
+        <div class="article-cards" id="article-cards"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>MarketMind &copy; 2026. Academic Project for Walchand College of Engineering, Sangli.</p>
+    <p style="margin-top: 4px; color: #475569;">
+      Lead: Piyush Rajurkar | ML &amp; RAG Microservice with PyTorch FinBERT &amp; Time-Constrained RAG
+    </p>
+  </footer>
+
+  <script>
+    let currentInterpretation = null;
+    let currentQuery = "";
+
+    function setQuery(text) {
+      document.getElementById('query-input').value = text;
+      handleQuerySubmit(new Event('submit'));
+    }
+
+    async function handleQuerySubmit(event) {
+      if (event) event.preventDefault();
+      const input = document.getElementById('query-input');
+      const query = input.value.trim();
+      if (!query) return;
+
+      currentQuery = query;
+      hideClarification();
+      hideResults();
+      showLoading("Understanding query & extracting stock/date parameters...");
+
+      try {
+        // Step 1: Query Understanding
+        const resp = await fetch('/api/query/understand', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: query })
+        });
+        const data = await resp.json();
+        currentInterpretation = data;
+
+        if (data.requires_clarification) {
+          hideLoading();
+          showClarification(data);
+          return;
+        }
+
+        // Step 2: Full Analysis
+        await executeAnalysis(data);
+      } catch (err) {
+        hideLoading();
+        alert("Failed to analyze query: " + err.message);
+      }
+    }
+
+    function showClarification(data) {
+      const modal = document.getElementById('clarification-modal');
+      const msg = document.getElementById('clarification-message');
+      const btnContainer = document.getElementById('clarification-buttons');
+      msg.textContent = data.clarification_reason || "Clarification required before retrieving news.";
+      btnContainer.innerHTML = '';
+
+      if (data.clarification_type === 'missing_year' && data.clarification_options) {
+        data.clarification_options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'btn-clarify-opt';
+          btn.textContent = `Year ${opt.year}`;
+          btn.onclick = () => selectYearClarification(opt.year);
+          btnContainer.appendChild(btn);
+        });
+      } else if (data.clarification_type === 'ambiguous_stock' && data.clarification_options) {
+        data.clarification_options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'btn-clarify-opt';
+          btn.textContent = `${opt.company_name} (${opt.ticker})`;
+          btn.onclick = () => selectStockClarification(opt.ticker, opt.company_name);
+          btnContainer.appendChild(btn);
+        });
+      } else {
+        const btn = document.createElement('button');
+        btn.className = 'btn-clarify-opt';
+        btn.textContent = 'Retry with 2025';
+        btn.onclick = () => selectYearClarification(2025);
+        btnContainer.appendChild(btn);
+      }
+
+      modal.classList.add('active');
+    }
+
+    function hideClarification() {
+      document.getElementById('clarification-modal').classList.remove('active');
+    }
+
+    async function selectYearClarification(year) {
+      hideClarification();
+      const updatedQuery = `${currentQuery} ${year}`;
+      document.getElementById('query-input').value = updatedQuery;
+      currentQuery = updatedQuery;
+      showLoading(`Running analysis for year ${year}...`);
+
+      const resp = await fetch('/api/query/understand', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: updatedQuery })
+      });
+      const data = await resp.json();
+      await executeAnalysis(data);
+    }
+
+    async function selectStockClarification(ticker, companyName) {
+      hideClarification();
+      showLoading(`Analyzing news for ${companyName} (${ticker})...`);
+      currentInterpretation.ticker = ticker;
+      currentInterpretation.company_name = companyName;
+      currentInterpretation.requires_clarification = false;
+      await executeAnalysis(currentInterpretation);
+    }
+
+    async function executeAnalysis(interpretation) {
+      showLoading("Retrieving historical news & evaluating FinBERT sentiment...");
+
+      const reqBody = {
+        query: currentQuery,
+        confirmed_interpretation: {
+          ticker: interpretation.ticker,
+          company_name: interpretation.company_name,
+          start_date: interpretation.start_date,
+          end_date: interpretation.end_date,
+          intent: interpretation.intent,
+          market: interpretation.market || "India",
+          exchange: interpretation.exchange || "NSE"
+        }
+      };
+
+      try {
+        const resp = await fetch('/api/analysis/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(reqBody)
+        });
+        const result = await resp.json();
+        hideLoading();
+        renderResults(result);
+      } catch (err) {
+        hideLoading();
+        alert("Error executing analysis: " + err.message);
+      }
+    }
+
+    function renderResults(data) {
+      const interp = data.query_interpretation;
+      const sent = data.sentiment_summary;
+      const exp = data.explanation;
+
+      // 1. Interpretation bar
+      const tagsContainer = document.getElementById('interpretation-tags');
+      tagsContainer.innerHTML = `
+        <span class="tag-item tag-highlight">🏢 ${interp.company_name || interp.ticker} (${interp.ticker})</span>
+        <span class="tag-item">🏛️ ${interp.exchange || 'NSE'} (${interp.market || 'India'})</span>
+        <span class="tag-item">📅 ${interp.start_date} to ${interp.end_date}</span>
+        <span class="tag-item">🎯 ${interp.intent.replace(/_/g, ' ').toUpperCase()}</span>
+      `;
+
+      // 2. Aggregate Sentiment of Whole News & Hero Banner
+      const score = (sent.weighted_sentiment_score !== undefined && sent.weighted_sentiment_score !== null)
+        ? sent.weighted_sentiment_score
+        : sent.sentiment_score;
+      const simpleScore = sent.sentiment_score;
+      const aggLabel = (sent.aggregate_label || 'NEUTRAL').toUpperCase();
+      const aggSentiment = sent.aggregate_sentiment || 'Neutral';
+
+      const heroBadge = document.getElementById('agg-hero-badge');
+      heroBadge.textContent = aggSentiment.toUpperCase();
+      heroBadge.className = 'badge-sentiment ' + (
+        score > 0.10 ? 'badge-positive' : (score < -0.10 ? 'badge-negative' : 'badge-neutral')
+      );
+
+      const heroScore = document.getElementById('agg-hero-score');
+      heroScore.textContent = (score > 0 ? '+' : '') + score.toFixed(2);
+      heroScore.style.color = score > 0.10 ? 'var(--bullish)' : (score < -0.10 ? 'var(--bearish)' : 'var(--neutral)');
+
+      document.getElementById('agg-hero-sub').textContent =
+        `Evaluated across ${sent.total_articles} verified articles using Relevance × Confidence Weighted Aggregate`;
+
+      const wProb = sent.weighted_probabilities || sent.mean_probabilities;
+      if (wProb) {
+        document.getElementById('weighted-prob-pos').textContent = (wProb.positive * 100).toFixed(1) + '%';
+        document.getElementById('weighted-prob-neu').textContent = (wProb.neutral * 100).toFixed(1) + '%';
+        document.getElementById('weighted-prob-neg').textContent = (wProb.negative * 100).toFixed(1) + '%';
+      }
+
+      if (sent.mean_probabilities) {
+        document.getElementById('mean-prob-pos').textContent = (sent.mean_probabilities.positive * 100).toFixed(1) + '%';
+        document.getElementById('mean-prob-neu').textContent = (sent.mean_probabilities.neutral * 100).toFixed(1) + '%';
+        document.getElementById('mean-prob-neg').textContent = (sent.mean_probabilities.negative * 100).toFixed(1) + '%';
+      }
+
+      // Metric card 1
+      const scoreEl = document.getElementById('sentiment-score-val');
+      scoreEl.textContent = (score > 0 ? '+' : '') + score.toFixed(2);
+      scoreEl.style.color = score > 0.10 ? 'var(--bullish)' : (score < -0.10 ? 'var(--bearish)' : 'var(--neutral)');
+      document.getElementById('sentiment-score-sub').textContent = `Weighted: ${(score > 0 ? '+' : '') + score.toFixed(2)} (Simple mean: ${(simpleScore > 0 ? '+' : '') + simpleScore.toFixed(2)})`;
+
+      // Bar distribution
+      const dist = sent.distribution;
+      document.getElementById('bar-pos').style.width = dist.positive_pct + '%';
+      document.getElementById('bar-neu').style.width = dist.neutral_pct + '%';
+      document.getElementById('bar-neg').style.width = dist.negative_pct + '%';
+
+      document.getElementById('sentiment-dist-val').textContent = `${sent.total_articles} Articles`;
+      document.getElementById('sentiment-dist-sub').innerHTML = `
+        <span style="color: var(--bullish);">${dist.positive} (${dist.positive_pct}%) Pos</span> •
+        <span style="color: var(--neutral);">${dist.neutral} (${dist.neutral_pct}%) Neu</span> •
+        <span style="color: var(--bearish);">${dist.negative} (${dist.negative_pct}%) Neg</span>
+      `;
+
+      document.getElementById('intent-val').textContent = interp.intent.replace(/_/g, ' ').toUpperCase();
+      document.getElementById('topic-tags').textContent = `Topics: ${(interp.topic || []).join(', ')}`;
+
+      // 3. Explanation blocks
+      document.getElementById('exp-price-movement').textContent = exp.observed_price_movement;
+      document.getElementById('exp-news-found').textContent = exp.negative_news_found;
+
+      const causesEl = document.getElementById('exp-potential-causes');
+      causesEl.innerHTML = (exp.potential_explanations || []).map(p => `<p style="margin-bottom: 6px;">• ${p}</p>`).join('');
+
+      const limitsEl = document.getElementById('exp-limitations');
+      limitsEl.innerHTML = (exp.uncertainty_and_limitations || []).map(l => `<p style="margin-bottom: 6px; color: #fde68a;">⚠️ ${l}</p>`).join('');
+
+      // 4. Citations
+      const citationsList = document.getElementById('article-cards');
+      document.getElementById('citations-count').textContent = `${(exp.citations || []).length} Citations Cited`;
+      if (!exp.citations || exp.citations.length === 0) {
+        citationsList.innerHTML = `<div style="color: var(--text-muted); padding: 1rem;">No articles to cite for this window.</div>`;
+      } else {
+        citationsList.innerHTML = exp.citations.map(c => `
+          <div class="article-card">
+            <a href="${c.link || '#'}" target="_blank" class="article-title-link">${c.title}</a>
+            <div class="article-meta">
+              <span>📅 ${c.published_at ? c.published_at.substring(0, 10) : 'Date unrecorded'}</span>
+              <span>📰 ${c.source || 'Financial Press'}</span>
+              <span class="badge-sentiment badge-${c.sentiment || 'neutral'}">${c.sentiment || 'neutral'}</span>
+              <span>Relevance: ${(c.relevance_score * 100).toFixed(0)}%</span>
+            </div>
+            <p class="article-snippet">${c.snippet || 'No excerpt available.'}</p>
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('results-dashboard').classList.add('active');
+    }
+
+    function showLoading(msg) {
+      document.getElementById('loading-message').textContent = msg;
+      document.getElementById('loading-state').classList.add('active');
+      document.getElementById('btn-submit').disabled = true;
+    }
+
+    function hideLoading() {
+      document.getElementById('loading-state').classList.remove('active');
+      document.getElementById('btn-submit').disabled = false;
+    }
+
+    function hideResults() {
+      document.getElementById('results-dashboard').classList.remove('active');
+    }
+
+    function toggleEditInterpretation() {
+      const year = prompt("Enter Year to update window (e.g. 2025, 2026):", "2025");
+      if (year) {
+        selectYearClarification(year.trim());
+      }
+    }
+  </script>
+</body>
+</html>

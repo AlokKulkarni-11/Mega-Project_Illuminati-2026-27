@@ -67,18 +67,26 @@ export interface Citation {
 export interface Explanation {
   symbol: string;
   date: string;
-  priceDirection: 'bullish' | 'bearish' | 'neutral';
+  priceDirection: 'bullish' | 'bearish' | 'neutral' | 'consolidating';
   returnPct: number;
   returnZ: number;
   hasClearDriver: boolean;
   causeSummary: string;
   causalCategory: string;
   scope: string;
-  newsDirection: 'bullish' | 'bearish' | 'neutral';
+  newsDirection: 'bullish' | 'bearish' | 'neutral' | 'no_news_available' | 'retrieval_failed';
   signalAgreement: 'aligned' | 'diverging' | 'insufficient';
   confidence: 'high' | 'medium' | 'low';
   citations: Citation[];
+  sentimentScore?: number | null;
+  validationStatus?: 'VALID' | 'PARTIALLY_VALID' | 'INVALID' | 'INSUFFICIENT_EVIDENCE';
+  validationErrors?: string[];
+  validatedCitations?: number[];
+  divergenceAnalysis?: string;
+  retrievalStatus?: string;
+  priceDataAvailable?: boolean;
 }
+
 
 export interface Horizon {
   days: number;

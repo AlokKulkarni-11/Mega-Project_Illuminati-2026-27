@@ -28,11 +28,11 @@ public class CacheConfig {
     public CacheManager cacheManager() {
         SimpleCacheManager manager = new SimpleCacheManager();
 
-        // 30 minute TTL for LLM/RAG explanations
+        // 10 second TTL for LLM/RAG explanations (allows rapid fresh query execution)
         CaffeineCache explanationsCache = new CaffeineCache(
                 CACHE_EXPLANATIONS,
                 Caffeine.newBuilder()
-                        .expireAfterWrite(Duration.ofMinutes(30))
+                        .expireAfterWrite(Duration.ofSeconds(10))
                         .maximumSize(1000)
                         .build()
         );
