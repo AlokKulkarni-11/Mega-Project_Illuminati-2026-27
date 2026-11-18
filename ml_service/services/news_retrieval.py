@@ -513,6 +513,93 @@ class NewsAPIProvider(BaseNewsProvider):
         return results
 
 
+class SupabaseNewsProvider(BaseNewsProvider):
+    """
+    Supabase cloud database provider for financial news.
+    Queries the 'news_articles' PostgreSQL table via PostgREST.
+    """
+    name: str = "supabase"
+
+    def __init__(
+        self,
+        supabase_url: Optional[str] = None,
+        supabase_key: Optional[str] = None
+    ):
+        self.supabase_url = (supabase_url or os.getenv("SUPABASE_URL") or "").rstrip("/")
+        self.supabase_key = (
+            supabase_key
+            or os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+            or os.getenv("SUPABASE_KEY")
+            or os.getenv("SUPABASE_ANON_KEY")
+            or ""
+        )
+
+    def is_available(self) -> bool:
+        return bool(self.supabase_url and self.supabase_key)
+
+    def fetch_news(
+        self,
+        ticker: str,
+        company_name: str,
+        aliases: List[str],
+        start_date: str,
+        end_date: str,
+        keywords: Optional[List[str]] = None,
+        max_articles: int = 15
+    ) -> List[Dict[str, Any]]:
+        if not self.is_available():
+            return []
+
+        endpoint = f"{self.supabase_url}/rest/v1/news_articles"
+        headers = {
+            "apikey": self.supabase_key,
+            "Authorization": f"Bearer {self.supabase_key}",
+            "Content-Type": "application/json"
+        }
+
+        sym = ticker.upper()
+        params = {
+            "select": "id,source,url,title,raw_text,published_at,entities,sentiment_label,sentiment_score",
+            "published_at": f"gte.{start_date}T00:00:00+05:30",
+            "order": "published_at.desc",
+            "limit": str(max_articles * 2)
+        }
+        if end_date:
+            params["and"] = f"(published_at.lte.{end_date}T23:59:59+05:30)"
+
+        params["or"] = f'(entities.cs.{{"{sym}"}},title.ilike.*{sym}*)'
+
+        try:
+            resp = requests.get(endpoint, headers=headers, params=params, timeout=10)
+            if resp.status_code != 200:
+                return []
+            data = resp.json()
+            if not isinstance(data, list):
+                return []
+
+            results = []
+            for row in data:
+                raw_text = (row.get("raw_text") or row.get("title") or "").strip()
+                pub_raw = row.get("published_at") or ""
+                pub_dt, has_time = parse_and_convert_to_ist(pub_raw)
+                pub_str = pub_dt.strftime("%Y-%m-%d %H:%M:%S") if pub_dt else pub_raw[:19]
+
+                results.append({
+                    "news_id": str(row.get("id") or hashlib.md5((row.get("url", "") + row.get("title", "")).encode()).hexdigest()[:16]),
+                    "symbol": sym,
+                    "title": row.get("title", "Financial Report"),
+                    "text_content": raw_text,
+                    "link": row.get("url", "#"),
+                    "source": row.get("source", "Financial News"),
+                    "published_at": pub_str,
+                    "market_label": row.get("sentiment_label"),
+                    "provider": self.name
+                })
+            return results[:max_articles]
+        except Exception as e:
+            return []
+
+
 class HistoricalNewsRetriever:
     """
     Retrieves and ranks historical news articles for a given stock and date range,
@@ -532,6 +619,7 @@ class HistoricalNewsRetriever:
         self.json_path = json_path or str(Path(__file__).parent.parent / "data" / "sample_news.json")
         self.enable_online_fallback = enable_online_fallback
         self.providers: List[BaseNewsProvider] = providers if providers is not None else [
+            SupabaseNewsProvider(),
             GoogleNewsRSSProvider(),
             GDELTNewsProvider(),
             NewsAPIProvider()
@@ -626,12 +714,58 @@ class HistoricalNewsRetriever:
         return "company_direct" if total_mentions >= 1 else "weak_or_irrelevant"
 
     def _load_local_corpus(self) -> List[Dict[str, Any]]:
-        """Loads articles from local CSV and JSON stores."""
+        """Loads articles from Supabase cloud, local CSV, and JSON stores."""
         if self._articles_cache is not None:
             return self._articles_cache
 
         articles = []
         seen_ids = set()
+
+        # 0. Load from Supabase cloud database if configured
+        supabase_url = (os.getenv("SUPABASE_URL") or "").rstrip("/")
+        supabase_key = (
+            os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+            or os.getenv("SUPABASE_KEY")
+            or os.getenv("SUPABASE_ANON_KEY")
+            or ""
+        )
+        if supabase_url and supabase_key:
+            try:
+                endpoint = f"{supabase_url}/rest/v1/news_articles"
+                headers = {
+                    "apikey": supabase_key,
+                    "Authorization": f"Bearer {supabase_key}",
+                    "Content-Type": "application/json"
+                }
+                params = {
+                    "select": "id,source,url,title,raw_text,published_at,entities,sentiment_label,sentiment_score",
+                    "order": "published_at.desc",
+                    "limit": "5000"
+                }
+                resp = requests.get(endpoint, headers=headers, params=params, timeout=10)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if isinstance(data, list) and data:
+                        for row in data:
+                            news_id = str(row.get("id"))
+                            if news_id in seen_ids:
+                                continue
+                            seen_ids.add(news_id)
+                            entities = row.get("entities") or []
+                            sym = entities[0] if entities else "MARKET"
+                            articles.append({
+                                "news_id": news_id,
+                                "symbol": sym,
+                                "title": row.get("title", ""),
+                                "text_content": row.get("raw_text") or row.get("title", ""),
+                                "link": row.get("url", ""),
+                                "source": row.get("source", "Supabase News"),
+                                "published_at": (row.get("published_at") or "")[:19].replace("T", " "),
+                                "market_label": row.get("sentiment_label"),
+                                "provider": "supabase"
+                            })
+            except Exception as e:
+                print(f"[NewsRetriever] Supabase cloud fetch notice: {e}")
 
         # 1. Load CSV dataset if present
         csv_file = Path(self.csv_path)
