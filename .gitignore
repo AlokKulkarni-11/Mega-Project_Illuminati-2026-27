@@ -23,6 +23,7 @@ ml_service/models/saved_models/
 *.pdf
 *.docx
 *.zip
+Final_Year_CSE_Project_AY_2026_27/
 
 # Node.js / Frontend
 node_modules/
