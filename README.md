@@ -3,7 +3,40 @@
 
 A financial intelligence web application that explains *why* Indian indices and stocks moved, combining price statistical anomalies, financial news citations, and market sentiment breadth.
 
-> 📖 **Comprehensive System Documentation**: For a deep-dive into mathematical formulations, system topologies, FinBERT/XGBoost pipelines, and the Google Gemini 200–250 word causal synthesis architecture, see **[PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md)**.
+> 📖 **Project Documentation**:
+> * [PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md) — Comprehensive technical architecture, mathematical formulations, FinBERT/XGBoost pipelines, and RAG evaluation.
+> * [PROJECT_SCHEMA.md](PROJECT_SCHEMA.md) — Complete database ER models, pgvector schemas, Pydantic/DTO contracts, and dataset structures.
+> * [HOW_TO_RUN.md](HOW_TO_RUN.md) — Dedicated multi-terminal setup, CLI commands, test suites, and troubleshooting guide.
+
+---
+
+## 🌐 System Topology & Port Mappings
+
+```
+┌────────────────────────────────────────────────────────┐
+│             FRONTEND (React 18 + Vite + TS)            │
+│          http://localhost:5173  (Port 5173)            │
+└───────────────────────────▲────────────────────────────┘
+                            │ REST / JSON (CORS Enabled)
+┌───────────────────────────▼────────────────────────────┐
+│         BACKEND GATEWAY (Spring Boot 3.3.4, Java 21)   │
+│          http://localhost:8085  (Port 8085)            │
+│      Swagger UI: http://localhost:8085/swagger-ui.html │
+└───────────────────────────▲────────────────────────────┘
+                            │ REST Contracts
+┌───────────────────────────▼────────────────────────────┐
+│         ML & RAG CAUSAL MICROSERVICE (FastAPI)         │
+│          http://127.0.0.1:8000  (Port 8000)            │
+│       API Docs: http://127.0.0.1:8000/docs             │
+└────────────────────────────────────────────────────────┘
+```
+
+| Service | Technology | Port | Access URL |
+| :--- | :--- | :---: | :--- |
+| **Research Desk UI** | React 18, Vite, TypeScript | `5173` | [http://localhost:5173](http://localhost:5173) |
+| **Backend Gateway** | Java 21, Spring Boot 3.3.4 | `8085` | [http://localhost:8085](http://localhost:8085) |
+| **ML Microservice** | Python 3.11, FastAPI | `8000` | [http://127.0.0.1:8000](http://127.0.0.1:8000) |
+| **Interactive Docs** | Swagger / OpenAPI | `8000` / `8085` | [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) |
 
 ---
 
@@ -35,43 +68,57 @@ MarketMind is organized as a production-grade monorepo:
 
 ---
 
-## Quickstart & Local Setup
+## 🚀 Quickstart: Running the Full Stack Locally
 
-### 1. Prerequisites
-- Docker & Docker Compose
-- Or locally: Java 21, Maven 3.9+, Node.js 20+, PostgreSQL 16 with pgvector
+To run the complete system locally, open **three terminal windows**:
 
-### 2. Environment Configuration
-Copy `.env.example` to `.env`:
+### Step 1: Environment Setup
+Copy `.env.example` to `.env` and add your [Google Gemini API Key](https://aistudio.google.com/apikey):
 ```bash
 cp .env.example .env
 ```
 
-### 3. Run with Docker Compose
-Start PostgreSQL, backend, and frontend with a single command:
+---
+
+### Terminal 1: Python ML & RAG Microservice (Port 8000)
+```powershell
+cd "p:\Mega Project"
+.\.venv\Scripts\Activate.ps1
+pip install -r ml_service/requirements.txt
+python -m uvicorn ml_service.main:app --host 127.0.0.1 --port 8000 --reload
+```
+* **API Documentation**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+* **Health Check**: [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
+
+---
+
+### Terminal 2: Spring Boot Backend Gateway (Port 8085)
+```powershell
+cd "p:\Mega Project\backend"
+.\mvnw.cmd spring-boot:run
+```
+* **Backend API & Swagger UI**: [http://localhost:8085/swagger-ui.html](http://localhost:8085/swagger-ui.html)
+* **Instruments Endpoint**: [http://localhost:8085/api/engine/instruments](http://localhost:8085/api/engine/instruments)
+
+---
+
+### Terminal 3: React Frontend Research Desk (Port 5173)
+```powershell
+cd "p:\Mega Project\frontend"
+npm install
+npm run dev
+```
+* **Research Desk UI**: Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+---
+
+### Alternative: Single-Command Docker Compose
 ```bash
 docker compose up --build
 ```
-- Frontend UI: `http://localhost:5173`
-- Backend API & Swagger: `http://localhost:8080/swagger-ui.html`
-- Health check: `http://localhost:8080/api/health`
+* UI: `http://localhost:5173` | Backend: `http://localhost:8080` (or `8085`) | PostgreSQL: `localhost:5432`
 
-### 4. Running Backend & Frontend Directly
-
-**Backend:**
-```bash
-cd backend
-mvn clean test
-mvn spring-boot:run
-```
-
-**Frontend:**
-```bash
-cd frontend
-npm install
-npm test
-npm run dev
-```
+> 💡 **Detailed Guide**: For testing suites, CLI commands, and troubleshooting, see **[HOW_TO_RUN.md](HOW_TO_RUN.md)**.
 
 ---
 
