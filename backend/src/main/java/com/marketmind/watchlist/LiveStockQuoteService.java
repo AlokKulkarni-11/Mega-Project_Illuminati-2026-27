@@ -81,7 +81,8 @@ public class LiveStockQuoteService {
         registerStock("CHOLAFIN", "Cholamandalam Investment & Fin", 1240.00, "Financial Services", false);
         registerStock("MUTHOOTFIN", "Muthoot Finance Limited", 1890.50, "Financial Services", false);
         registerStock("SHRIRAMFIN", "Shriram Finance Limited", 3120.00, "Financial Services", false);
-        registerStock("JIOFIN", "Jio Financial Services Ltd", 318.40, "Financial Services", false);
+        registerStock("JIOFIN", "Jio Financial Services Ltd", 226.80, "Financial Services", false);
+        registerStock("JIO", "Jio Financial Services Ltd", 226.80, "Financial Services", false);
         registerStock("HDFCLIFE", "HDFC Life Insurance Co Ltd", 678.50, "Insurance & Financials", false);
         registerStock("SBILIFE", "SBI Life Insurance Co Ltd", 1540.00, "Insurance & Financials", false);
 
@@ -113,7 +114,9 @@ public class LiveStockQuoteService {
         registerStock("NESTLEIND", "Nestle India Limited", 2290.00, "Consumer Goods / FMCG", false);
         registerStock("ASIANPAINT", "Asian Paints Limited", 2480.00, "Consumer Goods / Paints", false);
         registerStock("BRITANNIA", "Britannia Industries Ltd", 4980.00, "Consumer Goods / FMCG", false);
-        registerStock("DABUR", "Dabur India Limited", 524.00, "Consumer Goods / FMCG", false);
+        registerStock("DABUR", "Dabur India Limited", 390.65, "Consumer Goods / FMCG", false);
+        registerStock("COLPAL", "Colgate-Palmolive (India) Limited", 1776.60, "Consumer Goods / FMCG", false);
+        registerStock("COLGATE", "Colgate-Palmolive (India) Limited", 1776.60, "Consumer Goods / FMCG", false);
         registerStock("GODREJCP", "Godrej Consumer Products", 1180.00, "Consumer Goods / FMCG", false);
         registerStock("MARICO", "Marico Limited", 645.00, "Consumer Goods / FMCG", false);
         registerStock("TATACONSUM", "Tata Consumer Products Ltd", 965.00, "Consumer Goods / FMCG", false);
@@ -244,92 +247,94 @@ public class LiveStockQuoteService {
     }
 
     private StockQuote fetchFromYahooFinance(String symbol, boolean hasUsp) {
-        try {
-            String ticker = mapToYahooTicker(symbol);
-            String url = "https://query1.finance.yahoo.com/v8/finance/chart/" + ticker + "?interval=1d&range=1d";
+        String ticker = mapToYahooTicker(symbol);
+        String[] hosts = {
+                "https://query2.finance.yahoo.com/v8/finance/chart/",
+                "https://query1.finance.yahoo.com/v8/finance/chart/"
+        };
 
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-                    .timeout(Duration.ofSeconds(2))
-                    .GET()
-                    .build();
+        for (String baseHost : hosts) {
+            try {
+                String url = baseHost + ticker;
 
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 200 || response.body() == null || response.body().isBlank()) {
-                log.debug("Yahoo Finance returned status {} for {}", response.statusCode(), ticker);
-                return null;
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(url))
+                        .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                        .timeout(Duration.ofSeconds(3))
+                        .GET()
+                        .build();
+
+                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() != 200 || response.body() == null || response.body().isBlank()) {
+                    continue;
+                }
+
+                JsonNode root = objectMapper.readTree(response.body());
+                JsonNode resultNode = root.path("chart").path("result");
+                if (resultNode.isMissingNode() || !resultNode.isArray() || resultNode.isEmpty()) {
+                    continue;
+                }
+
+                JsonNode meta = resultNode.get(0).path("meta");
+                double price = meta.path("regularMarketPrice").asDouble(0.0);
+                if (price <= 0.0) continue;
+
+                double prevClose = meta.path("chartPreviousClose").asDouble(price);
+                double changePercent = meta.path("regularMarketChangePercent").asDouble(
+                        prevClose > 0 ? ((price - prevClose) / prevClose) * 100 : 0.0
+                );
+                double change = price - prevClose;
+                double dayHigh = meta.path("regularMarketDayHigh").asDouble(price * 1.01);
+                double dayLow = meta.path("regularMarketDayLow").asDouble(price * 0.99);
+                long volume = meta.path("regularMarketVolume").asLong(1500000L);
+
+                String name = meta.path("longName").asText(meta.path("shortName").asText(symbol));
+                FallbackStockInfo info = directory.get(symbol.toUpperCase().trim());
+                String sector = info != null ? info.sector() : "Indian Equities (NSE)";
+
+                return new StockQuote(
+                        symbol,
+                        name,
+                        Math.round(price * 100.0) / 100.0,
+                        Math.round(change * 100.0) / 100.0,
+                        Math.round(changePercent * 100.0) / 100.0,
+                        Math.round(dayHigh * 100.0) / 100.0,
+                        Math.round(dayLow * 100.0) / 100.0,
+                        volume,
+                        sector,
+                        hasUsp
+                );
+            } catch (Exception e) {
+                log.debug("Live quote lookup via {} for {} skipped: {}", baseHost, ticker, e.getMessage());
             }
-
-            JsonNode root = objectMapper.readTree(response.body());
-            JsonNode resultNode = root.path("chart").path("result");
-            if (resultNode.isMissingNode() || !resultNode.isArray() || resultNode.isEmpty()) {
-                return null;
-            }
-
-            JsonNode meta = resultNode.get(0).path("meta");
-            double price = meta.path("regularMarketPrice").asDouble(0.0);
-            if (price <= 0.0) return null;
-
-            double prevClose = meta.path("chartPreviousClose").asDouble(price);
-            double changePercent = meta.path("regularMarketChangePercent").asDouble(
-                    prevClose > 0 ? ((price - prevClose) / prevClose) * 100 : 0.0
-            );
-            double change = price - prevClose;
-            double dayHigh = meta.path("regularMarketDayHigh").asDouble(price * 1.01);
-            double dayLow = meta.path("regularMarketDayLow").asDouble(price * 0.99);
-            long volume = meta.path("regularMarketVolume").asLong(1500000L);
-
-            String name = meta.path("longName").asText(meta.path("shortName").asText(symbol));
-            FallbackStockInfo info = directory.get(symbol);
-            String sector = info != null ? info.sector() : "Indian Equities (NSE)";
-
-            return new StockQuote(
-                    symbol,
-                    name,
-                    Math.round(price * 100.0) / 100.0,
-                    Math.round(change * 100.0) / 100.0,
-                    Math.round(changePercent * 100.0) / 100.0,
-                    Math.round(dayHigh * 100.0) / 100.0,
-                    Math.round(dayLow * 100.0) / 100.0,
-                    volume,
-                    sector,
-                    hasUsp
-            );
-        } catch (Exception e) {
-            log.debug("Live quote lookup for {} via Yahoo Finance skipped: {}", symbol, e.getMessage());
-            return null;
         }
+        return null;
     }
 
     private String mapToYahooTicker(String symbol) {
-        if (symbol.equalsIgnoreCase("NIFTYBANK")) {
-            return "^NSEBANK";
-        }
-        if (symbol.equalsIgnoreCase("NIFTY") || symbol.equalsIgnoreCase("NIFTY50")) {
-            return "^NSEI";
-        }
-        if (symbol.equalsIgnoreCase("SBI")) {
-            return "SBIN.NS";
-        }
-        if (symbol.equalsIgnoreCase("HDFC")) {
-            return "HDFCBANK.NS";
-        }
-        if (symbol.endsWith(".NS") || symbol.endsWith(".BO")) {
-            return symbol;
-        }
-        return symbol + ".NS";
+        String s = symbol.toUpperCase().trim();
+        if (s.equals("NIFTYBANK")) return "^NSEBANK";
+        if (s.equals("NIFTY") || s.equals("NIFTY50")) return "^NSEI";
+        if (s.equals("SBI")) return "SBIN.NS";
+        if (s.equals("HDFC")) return "HDFCBANK.NS";
+        if (s.equals("COLGATE")) return "COLPAL.NS";
+        if (s.equals("JIO")) return "JIOFIN.NS";
+        if (s.equals("AIRTEL")) return "BHARTIARTL.NS";
+        if (s.equals("LARSEN") || s.equals("L&T")) return "LT.NS";
+        if (s.equals("MAHINDRA")) return "M&M.NS";
+        if (s.endsWith(".NS") || s.endsWith(".BO")) return s;
+        return s + ".NS";
     }
 
     private StockQuote generateFallbackQuote(String symbol, boolean hasUsp) {
-        FallbackStockInfo info = directory.get(symbol);
-        String name = info != null ? info.name() : symbol + " (NSE)";
+        String s = symbol.toUpperCase().trim();
+        FallbackStockInfo info = directory.get(s);
+        int hash = Math.abs(s.hashCode());
+        double base = info != null ? info.basePrice() : 250.0 + (hash % 2800);
+        String name = info != null ? info.name() : s + " (NSE)";
         String sector = info != null ? info.sector() : "Indian Equities (NSE)";
-        double base = info != null ? info.basePrice() : 1250.0;
 
-        // Minor simulated daily variance for offline fallback
-        int hash = Math.abs(symbol.hashCode());
-        double pctChg = ((hash % 40) - 20) / 10.0; // between -2.0% and +2.0%
+        double pctChg = ((hash % 50) - 25) / 10.0; // between -2.5% and +2.5%
         double price = base * (1.0 + pctChg / 100.0);
         double change = price - base;
 
@@ -341,7 +346,7 @@ public class LiveStockQuoteService {
                 Math.round(pctChg * 100.0) / 100.0,
                 Math.round(price * 1.012 * 100.0) / 100.0,
                 Math.round(price * 0.988 * 100.0) / 100.0,
-                2450000L + (hash % 1000000),
+                1500000L + (hash % 8500000),
                 sector,
                 hasUsp
         );
