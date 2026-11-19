@@ -81,15 +81,19 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({ capabilities }) =>
     staleTime: 60000,
   });
 
-  // Close autocomplete on click outside
+  // Close autocomplete on click outside or escape
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
         setIsDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, []);
 
   const addMutation = useMutation({
@@ -205,9 +209,9 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({ capabilities }) =>
       </div>
 
       {/* Search & Add Stock Form with Autocomplete */}
-      <div className="mb-6" ref={searchContainerRef}>
+      <div className="mb-6">
         <form onSubmit={handleFormSubmit} className="relative flex items-center gap-2 max-w-xl">
-          <div className="relative flex-1">
+          <div className="relative flex-1" ref={searchContainerRef}>
             <input
               type="text"
               value={newSymbol}
@@ -216,7 +220,12 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({ capabilities }) =>
                 setIsDropdownOpen(true);
               }}
               onFocus={() => setIsDropdownOpen(true)}
-              placeholder="Search or add any stock (e.g. TATAMOTORS, ICICIBANK, ITC, SBIN, TCS)…"
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  setIsDropdownOpen(false);
+                }
+              }}
+              placeholder="Search ticker or company (e.g. DABUR, RELIANCE, JIO, TCS)…"
               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 shadow-xs"
             />
             {newSymbol && (
@@ -234,69 +243,78 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({ capabilities }) =>
 
             {/* Live Autocomplete Dropdown */}
             {isDropdownOpen && (
-              <div className="absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
-                {/* Dynamic Direct Add for Any Stock in the Market */}
+              <div className="absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+                {/* 1. Matching Stock Results with Prices & Badges */}
+                {searchResults && searchResults.length > 0 ? (
+                  searchResults.map((stock: StockDirectoryItem) => {
+                    const displayTicker = stock.symbol.endsWith('.NS') ? stock.symbol : `${stock.symbol}.NS`;
+                    return (
+                      <button
+                        key={stock.symbol}
+                        type="button"
+                        onClick={() => {
+                          handleAddSymbol(stock.symbol);
+                          setIsDropdownOpen(false);
+                        }}
+                        className="w-full text-left p-3.5 hover:bg-amber-50/60 dark:hover:bg-slate-800/80 transition-colors flex items-center justify-between group cursor-pointer"
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-sm text-slate-900 dark:text-slate-100 group-hover:text-amber-600 transition-colors">
+                              {displayTicker}
+                            </span>
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                              NSE
+                            </span>
+                            {stock.hasSentimentUsp && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                                ⚡ AI Causal USP
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-sm mt-0.5 font-medium">
+                            {stock.name} · <span className="italic">{stock.sector}</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-sm font-mono font-bold text-slate-900 dark:text-slate-100">
+                            {stock.basePrice > 0 ? formatPrice(stock.basePrice) : 'Live Quote'}
+                          </span>
+                          <span className="block text-[11px] font-bold text-amber-600 dark:text-amber-400 group-hover:underline">
+                            + Add to Watchlist
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })
+                ) : (
+                  newSymbol.trim() && (
+                    <div className="p-4 text-center text-xs text-slate-500 dark:text-slate-400 italic">
+                      No matching indexed stocks for "{newSymbol}". You can add it directly below.
+                    </div>
+                  )
+                )}
+
+                {/* 2. Direct Add fallback option at bottom if query typed */}
                 {newSymbol.trim() && (
                   <button
                     type="button"
-                    onClick={() => handleAddSymbol(newSymbol)}
-                    className="w-full text-left p-3.5 bg-amber-50/70 dark:bg-amber-950/40 hover:bg-amber-100/80 dark:hover:bg-amber-900/60 transition-colors flex items-center justify-between border-b border-amber-200/80 dark:border-amber-800 cursor-pointer"
+                    onClick={() => {
+                      handleAddSymbol(newSymbol);
+                      setIsDropdownOpen(false);
+                    }}
+                    className="w-full text-left p-3 bg-slate-50 dark:bg-slate-800/50 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors flex items-center justify-between border-t border-slate-200 dark:border-slate-800 cursor-pointer"
                   >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-sm text-amber-950 dark:text-amber-200">
-                          + Add "{newSymbol.trim().toUpperCase()}"
-                        </span>
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-200/80 dark:bg-amber-800 text-amber-950 dark:text-amber-100">
-                          Complete Market Feed
-                        </span>
-                      </div>
-                      <div className="text-xs text-amber-800 dark:text-amber-300">
-                        Add any Indian equity directly with live quotes from NSE
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300">
+                        + Add <b className="text-amber-600 dark:text-amber-400">"{newSymbol.trim().toUpperCase()}"</b> directly from NSE live feed
+                      </span>
                     </div>
-                    <span className="text-xs font-bold text-amber-800 dark:text-amber-300">
+                    <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
                       Add Now →
                     </span>
                   </button>
                 )}
-
-                {searchResults && searchResults.map((stock: StockDirectoryItem) => (
-                  <button
-                    key={stock.symbol}
-                    type="button"
-                    onClick={() => handleAddSymbol(stock.symbol)}
-                    className="w-full text-left p-3 hover:bg-slate-50 dark:hover:bg-slate-800/70 transition-colors flex items-center justify-between group cursor-pointer"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-sm text-slate-900 dark:text-slate-100 group-hover:text-amber-600 transition-colors">
-                          {stock.symbol}
-                        </span>
-                        {stock.hasSentimentUsp ? (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
-                            ⚡ AI Causal USP
-                          </span>
-                        ) : (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                            Market Quote
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-sm">
-                        {stock.name} · <span className="italic">{stock.sector}</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
-                        {stock.basePrice > 0 ? formatPrice(stock.basePrice) : 'Live Feed'}
-                      </span>
-                      <span className="block text-[10px] font-bold text-amber-600 dark:text-amber-400">
-                        + Add to Watchlist
-                      </span>
-                    </div>
-                  </button>
-                ))}
               </div>
             )}
           </div>
