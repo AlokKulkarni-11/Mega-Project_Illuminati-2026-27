@@ -18,7 +18,7 @@
     "symbol": "NIFTYBANK",
     "date": "2026-02-01",
     "priceDirection": "bearish",
-    "returnPct": -2.0,
+    "returnPct": -2,
     "returnZ": -2.33,
     "hasClearDriver": true,
     "causeSummary": "Union Budget 2026 presented on Feb 1; PSU banks fell sharply on merger concerns and the government's record Rs 17.2 trillion borrowing plan, which raised bond yield concerns hurting PSU bank treasury books.",
@@ -345,6 +345,52 @@
         "source": "Economic Times",
         "url": "https://economictimes.indiatimes.com/markets/banking-stocks-light-volume",
         "publishedDate": "2026-09-14"
+      }
+    ]
+  },
+  {
+    "symbol": "SBIN",
+    "date": "2026-09-15",
+    "priceDirection": "bullish",
+    "returnPct": 2.45,
+    "returnZ": 2.15,
+    "hasClearDriver": true,
+    "causeSummary": "State Bank of India reported robust credit growth of 15.2% YoY driven by retail and SME advances, with gross NPAs improving to multi-year lows. Institutional buyers expanded holdings in public sector banking leaders.",
+    "causalCategory": "company_specific",
+    "scope": "company",
+    "newsDirection": "bullish",
+    "signalAgreement": "aligned",
+    "confidence": "high",
+    "citations": [
+      {
+        "n": 1,
+        "title": "SBI shares advance on strong credit expansion and asset quality upgrade",
+        "source": "Economic Times / Moneycontrol",
+        "url": "https://economictimes.indiatimes.com/markets/stocks/news/sbi-credit-growth",
+        "publishedDate": "2026-09-15"
+      }
+    ]
+  },
+  {
+    "symbol": "NIFTY",
+    "date": "2026-09-15",
+    "priceDirection": "bullish",
+    "returnPct": 0.85,
+    "returnZ": 1.95,
+    "hasClearDriver": true,
+    "causeSummary": "Nifty 50 benchmark traded firmly higher supported by banking and financial heavyweights, following resilient domestic macro prints and steady institutional DII inflows.",
+    "causalCategory": "macro",
+    "scope": "market_wide",
+    "newsDirection": "bullish",
+    "signalAgreement": "aligned",
+    "confidence": "high",
+    "citations": [
+      {
+        "n": 1,
+        "title": "Nifty 50 extends rally led by banking majors; DII buying counters global headwinds",
+        "source": "Livemint",
+        "url": "https://www.livemint.com/market/stock-market-news/nifty-50-rally-banking-gains",
+        "publishedDate": "2026-09-15"
       }
     ]
   }

@@ -24,10 +24,14 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      localStorage.removeItem('marketmind_token');
-      localStorage.removeItem('marketmind_user');
-      if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
-        window.location.href = '/login';
+      const url = error.config?.url || '';
+      // Do not boot user to login for watchlist or public capabilities
+      if (!url.includes('/watchlist') && !url.includes('/capabilities')) {
+        localStorage.removeItem('marketmind_token');
+        localStorage.removeItem('marketmind_user');
+        if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+          window.location.href = '/login';
+        }
       }
     }
     return Promise.reject(error);

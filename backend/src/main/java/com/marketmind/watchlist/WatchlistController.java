@@ -10,10 +10,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/watchlist")
-@Tag(name = "Watchlist", description = "User watchlist management with engine enrichment")
+@Tag(name = "Watchlist", description = "User watchlist management with engine enrichment and live market data")
 public class WatchlistController {
 
     private final WatchlistService watchlistService;
@@ -25,7 +26,8 @@ public class WatchlistController {
     @GetMapping
     @Operation(summary = "Get user watchlist items")
     public ResponseEntity<List<WatchlistItemDto>> getWatchlist(@AuthenticationPrincipal UserPrincipal principal) {
-        return ResponseEntity.ok(watchlistService.getWatchlist(principal.getId()));
+        UUID userId = resolveUserId(principal);
+        return ResponseEntity.ok(watchlistService.getWatchlist(userId));
     }
 
     @PostMapping
@@ -34,7 +36,8 @@ public class WatchlistController {
             @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody WatchlistRequest request
     ) {
-        return ResponseEntity.ok(watchlistService.addToWatchlist(principal.getId(), request.symbol()));
+        UUID userId = resolveUserId(principal);
+        return ResponseEntity.ok(watchlistService.addToWatchlist(userId, request.symbol()));
     }
 
     @DeleteMapping("/{symbol}")
@@ -43,7 +46,8 @@ public class WatchlistController {
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable String symbol
     ) {
-        watchlistService.removeFromWatchlist(principal.getId(), symbol);
+        UUID userId = resolveUserId(principal);
+        watchlistService.removeFromWatchlist(userId, symbol);
         return ResponseEntity.ok(Map.of("message", "Symbol removed from watchlist", "symbol", symbol));
     }
 
@@ -53,7 +57,33 @@ public class WatchlistController {
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestParam String symbol
     ) {
-        boolean exists = watchlistService.isInWatchlist(principal.getId(), symbol);
+        UUID userId = resolveUserId(principal);
+        boolean exists = watchlistService.isInWatchlist(userId, symbol);
         return ResponseEntity.ok(Map.of("inWatchlist", exists));
+    }
+
+    private UUID resolveUserId(UserPrincipal principal) {
+        if (principal != null && principal.getId() != null) {
+            return principal.getId();
+        }
+        return WatchlistService.DEFAULT_DEMO_USER_ID;
+    }
+
+    @GetMapping("/directory")
+    @Operation(summary = "Search all Indian equity stocks across sectors")
+    public ResponseEntity<List<LiveStockQuoteService.FallbackStockInfo>> searchStocks(
+            @RequestParam(required = false, defaultValue = "") String q
+    ) {
+        return ResponseEntity.ok(watchlistService.searchDirectory(q));
+    }
+
+    @GetMapping("/quote/{symbol}")
+    @Operation(summary = "Get live stock quote and USP availability")
+    public ResponseEntity<LiveStockQuoteService.StockQuote> getLiveQuote(@PathVariable String symbol) {
+        LiveStockQuoteService.StockQuote quote = watchlistService.getLiveQuote(symbol);
+        if (quote == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(quote);
     }
 }

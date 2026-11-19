@@ -5,10 +5,10 @@ import { ComparisonRow } from '../types';
 
 export const ComparisonPage: React.FC = () => {
   const [selectedSymbols, setSelectedSymbols] = useState<string[]>([
+    'SBIN',
     'TCS',
-    'INFY',
-    'RELIANCE',
     'HDFCBANK',
+    'NIFTYBANK',
   ]);
 
   const { data: comparison, isLoading } = useQuery({
@@ -16,7 +16,7 @@ export const ComparisonPage: React.FC = () => {
     queryFn: () => getComparisonApi(selectedSymbols),
   });
 
-  const availableSymbols = ['NIFTYBANK', 'TCS', 'INFY', 'RELIANCE', 'HDFCBANK'];
+  const availableSymbols = ['SBIN', 'TCS', 'HDFCBANK', 'NIFTYBANK', 'NIFTY', 'RELIANCE', 'INFY'];
 
   const toggleSymbol = (sym: string) => {
     if (selectedSymbols.includes(sym)) {

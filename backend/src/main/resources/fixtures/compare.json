@@ -34,6 +34,20 @@
       "changePct": -1.43,
       "regime": "bearish",
       "agreement": "insufficient"
+    },
+    {
+      "symbol": "SBIN",
+      "latestPrice": 814.50,
+      "changePct": 2.45,
+      "regime": "bullish",
+      "agreement": "aligned"
+    },
+    {
+      "symbol": "NIFTY",
+      "latestPrice": 24420.00,
+      "changePct": 0.85,
+      "regime": "bullish",
+      "agreement": "aligned"
     }
   ]
 }

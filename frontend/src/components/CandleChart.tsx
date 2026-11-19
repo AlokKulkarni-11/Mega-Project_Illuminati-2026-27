@@ -42,7 +42,7 @@ export const CandleChart: React.FC<Props> = ({ bars, type, showSma, showVolume, 
   const line = bars.map((b, i) => `${i ? 'L' : 'M'}${x(i)},${y(b.close)}`).join('');
 
   return (
-    <div className="chart-row border-y border-ink bg-paper-inset py-2">
+    <div className="chart-row tv-card p-4 my-4 shadow-sm">
       <div className="text-xs text-ink-soft px-2 min-h-[22px] tabular-nums">
         <span className="font-medium text-ink">{cur.from === cur.to ? cur.date : `${cur.from} → ${cur.to}`}</span>
         {'  '}O {fmt(cur.open)}  H {fmt(cur.high)}  L {fmt(cur.low)}  C{' '}

@@ -48,7 +48,7 @@ export const GlossaryTerm: React.FC<GlossaryTermProps> = ({ termKey, children })
       {isOpen && (
         <div
           role="tooltip"
-          className="absolute z-40 bottom-full left-0 mb-2 w-72 p-3 bg-paper-inset border border-rule shadow-sm text-xs text-ink rounded-none"
+          className="absolute z-40 bottom-full left-0 mb-2 w-72 p-3.5 bg-paper border border-rule shadow-lg text-xs text-ink rounded-lg"
         >
           <div className="font-serif font-semibold text-sm mb-1 text-ink">{definition.term}</div>
           <p className="text-ink-soft leading-relaxed">{definition.definition}</p>

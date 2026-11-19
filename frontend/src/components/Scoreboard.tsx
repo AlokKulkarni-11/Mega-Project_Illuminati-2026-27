@@ -9,7 +9,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({ scoreboard }) => {
   if (!scoreboard) return null;
 
   return (
-    <div className="border border-rule bg-paper-inset p-4 my-6">
+    <div className="tv-card p-5 my-6 shadow-sm">
       <div className="flex items-baseline justify-between mb-2">
         <span className="text-xs uppercase tracking-wider text-ink-soft font-mono">— Historical Model Accuracy</span>
         <span className="text-xs text-brass font-medium">Nifty Bank Backtest</span>

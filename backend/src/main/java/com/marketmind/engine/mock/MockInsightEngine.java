@@ -142,20 +142,45 @@ public class MockInsightEngine implements InsightEngine {
     @Override
     public List<AnomalyDto> anomalies(String symbol, LocalDate from, LocalDate to) {
         String sym = symbol.toUpperCase().trim();
-        return anomalyList.stream()
-                .filter(a -> sym.equalsIgnoreCase(a.symbol()) || sym.equals("NIFTYBANK"))
+        List<AnomalyDto> list = anomalyList.stream()
+                .filter(a -> sym.equalsIgnoreCase(a.symbol()))
                 .filter(a -> from == null || !a.date().isBefore(from))
                 .filter(a -> to == null || !a.date().isAfter(to))
                 .sorted(Comparator.comparing(AnomalyDto::date).reversed())
                 .collect(Collectors.toList());
+
+        if (list.isEmpty() && !sym.equals("NIFTYBANK")) {
+            // Adapt fixtures for other tracked symbols in mock mode
+            list = anomalyList.stream()
+                    .filter(a -> from == null || !a.date().isBefore(from))
+                    .filter(a -> to == null || !a.date().isAfter(to))
+                    .map(a -> new AnomalyDto(sym, a.date(), a.direction(), a.returnPct(), a.returnZ(), a.label(), a.confidence()))
+                    .sorted(Comparator.comparing(AnomalyDto::date).reversed())
+                    .collect(Collectors.toList());
+        }
+        return list;
     }
 
     @Override
     public ExplanationDto explanation(String symbol, LocalDate date) {
         String sym = symbol.toUpperCase().trim();
-        Optional<ExplanationDto> match = explanationList.stream()
-                .filter(e -> sym.equalsIgnoreCase(e.symbol()) && (date == null || date.equals(e.date())))
-                .findFirst();
+        Optional<ExplanationDto> match;
+
+        if (date != null) {
+            match = explanationList.stream()
+                    .filter(e -> sym.equalsIgnoreCase(e.symbol()) && date.equals(e.date()))
+                    .findFirst();
+        } else {
+            // When no specific date is queried, prefer a confirmed case with verified news sentiment driver
+            match = explanationList.stream()
+                    .filter(e -> sym.equalsIgnoreCase(e.symbol()) && Boolean.TRUE.equals(e.hasClearDriver()))
+                    .findFirst();
+            if (match.isEmpty()) {
+                match = explanationList.stream()
+                        .filter(e -> sym.equalsIgnoreCase(e.symbol()))
+                        .findFirst();
+            }
+        }
 
         if (match.isPresent()) {
             return match.get();

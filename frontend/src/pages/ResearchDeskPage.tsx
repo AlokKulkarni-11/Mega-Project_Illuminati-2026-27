@@ -7,6 +7,7 @@ import { loadChartPrefs } from './SettingsPage';
 import { Sparkline } from '../components/Sparkline';
 import { GlossaryTerm } from '../components/GlossaryTerm';
 import { useToast } from '../components/Toast';
+import { InvestigationLoader } from '../components/InvestigationLoader';
 import {
   getInstrumentsApi,
   getPricesApi,
@@ -22,8 +23,10 @@ export const ResearchDeskPage: React.FC = () => {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [queryInput, setQueryInput] = useState('');
-  const [selectedSymbol, setSelectedSymbol] = useState('NIFTYBANK');
-  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedSymbol, setSelectedSymbol] = useState('SBIN');
+  const [selectedDate, setSelectedDate] = useState<string>('2026-09-15');
+  const [isInvestigating, setIsInvestigating] = useState<boolean>(false);
+  const [investigatingQueryText, setInvestigatingQueryText] = useState<string>('');
   const [emptyNote, setEmptyNote] = useState<string | null>(null);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [feedbackGiven, setFeedbackGiven] = useState<'helpful' | 'unhelpful' | null>(null);
@@ -42,10 +45,13 @@ export const ResearchDeskPage: React.FC = () => {
     queryFn: () => getAnomaliesApi(selectedSymbol),
   });
 
-  // Pick default anomaly date when anomalies load
+  // Pick default anomaly date when anomalies load: prioritize confirmed anomaly with verified news & price sentiment (our USP)
   useEffect(() => {
     if (anomalies && anomalies.length > 0 && !selectedDate) {
-      setSelectedDate(anomalies[0].date);
+      const confirmed =
+        anomalies.find((a: Anomaly) => a.confidence === 'high' || a.confidence === 'medium') ||
+        anomalies[0];
+      setSelectedDate(confirmed.date);
     }
   }, [anomalies, selectedDate]);
 
@@ -87,21 +93,37 @@ export const ResearchDeskPage: React.FC = () => {
 
   const handleRunQuery = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!queryInput.trim()) return;
+    const query = queryInput.trim();
+    if (!query) return;
+
+    setIsInvestigating(true);
+    setInvestigatingQueryText(query);
+    setEmptyNote(null);
+    const startTime = Date.now();
+
+    const pacingDelay = async () => {
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 1500) {
+        await new Promise((r) => setTimeout(r, 1500 - elapsed));
+      }
+    };
 
     try {
+      let matchedSymbol: string | null = null;
+      let targetDt: string = '';
+
       // 1. Try rich natural language query understanding via Python ML service
       try {
         const mlResp = await fetch('http://localhost:8000/api/query/understand', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: queryInput.trim() }),
+          body: JSON.stringify({ query }),
         });
         if (mlResp.ok) {
           const mlData = await mlResp.json();
           if (mlData.ticker) {
-            setSelectedSymbol(mlData.ticker);
-            let targetDt = mlData.end_date || mlData.start_date;
+            matchedSymbol = mlData.ticker;
+            targetDt = mlData.end_date || mlData.start_date || '';
             
             if (!targetDt && mlData.date_expression) {
               const lowerExpr = mlData.date_expression.toLowerCase();
@@ -112,45 +134,54 @@ export const ResearchDeskPage: React.FC = () => {
               else if (lowerExpr.includes('jun')) targetDt = '2025-06-30';
               else if (lowerExpr.includes('nov')) targetDt = '2025-11-26';
             }
-
-            setSelectedDate(targetDt || '');
-            setEmptyNote(null);
-            queryClient.invalidateQueries({ queryKey: ['explanation'] });
-            queryClient.invalidateQueries({ queryKey: ['anomalies'] });
-            queryClient.invalidateQueries({ queryKey: ['prices'] });
-            setTimeout(() => {
-              document.getElementById('explanation-section')?.scrollIntoView({ behavior: 'smooth' });
-            }, 400);
-            return;
           }
         }
       } catch {
         // Fall back to Spring Boot query resolution
       }
 
-      // 2. Fallback to Spring Boot /api/query/resolve
-      const res = await resolveQueryApi(queryInput.trim());
-      if (res.symbols && res.symbols.length > 0) {
-        setSelectedSymbol(res.symbols[0]);
-        setSelectedDate('');
-        setEmptyNote(null);
-        queryClient.invalidateQueries({ queryKey: ['explanation'] });
-        queryClient.invalidateQueries({ queryKey: ['anomalies'] });
-        queryClient.invalidateQueries({ queryKey: ['prices'] });
-        setTimeout(() => {
-          document.getElementById('explanation-section')?.scrollIntoView({ behavior: 'smooth' });
-        }, 400);
-      } else {
-        setEmptyNote(res.unmatchedMessage || 'Not in this dossier tracked universe yet.');
+      // 2. Fallback to Spring Boot /api/query/resolve if ML didn't return a ticker
+      if (!matchedSymbol) {
+        const res = await resolveQueryApi(query);
+        if (res.symbols && res.symbols.length > 0) {
+          matchedSymbol = res.symbols[0];
+          targetDt = '';
+        } else {
+          await pacingDelay();
+          setEmptyNote(res.unmatchedMessage || `No tracked historical dossier found for "${query}".`);
+          setIsInvestigating(false);
+          return;
+        }
       }
+
+      await pacingDelay();
+      setSelectedSymbol(matchedSymbol);
+      setSelectedDate(targetDt || (matchedSymbol === 'NIFTYBANK' ? '2026-02-01' : '2026-09-15'));
+      setEmptyNote(null);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['explanation'] }),
+        queryClient.invalidateQueries({ queryKey: ['anomalies'] }),
+        queryClient.invalidateQueries({ queryKey: ['prices'] }),
+      ]);
+      setTimeout(() => {
+        document.getElementById('explanation-section')?.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
     } catch {
+      await pacingDelay();
       setEmptyNote('Unable to resolve query at this time.');
+    } finally {
+      setIsInvestigating(false);
     }
   };
 
   const handleSelectChip = (sym: string) => {
     setSelectedSymbol(sym);
-    setSelectedDate(''); // Let it pick the anomaly for this new symbol
+    if (sym === 'NIFTYBANK') {
+      setSelectedDate('2026-02-01');
+    } else {
+      setSelectedDate('2026-09-15');
+    }
+    setQueryInput('');
     setEmptyNote(null);
     setFeedbackGiven(null);
     queryClient.invalidateQueries({ queryKey: ['explanation'] });
@@ -182,52 +213,80 @@ export const ResearchDeskPage: React.FC = () => {
 
   const currentPriceStr = currentPricePoint
     ? `₹${Number(currentPricePoint.close).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
-    : '₹56,470.65';
+    : '—';
 
-  const returnPct = explanation ? Number(explanation.returnPct) : -1.43;
-  const isGain = returnPct >= 0;
-  const changeStr = `${isGain ? '+' : ''}${returnPct.toFixed(2)}%`;
+  const returnPct = explanation && explanation.returnPct !== undefined && explanation.returnPct !== null
+    ? Number(explanation.returnPct)
+    : (currentPricePoint?.open && currentPricePoint?.close
+        ? ((currentPricePoint.close - currentPricePoint.open) / currentPricePoint.open) * 100
+        : null);
+  const isGain = returnPct !== null ? returnPct >= 0 : false;
+  const changeStr = returnPct !== null ? `${isGain ? '+' : ''}${returnPct.toFixed(2)}%` : '—';
 
   return (
     <div className="desk pt-6">
       {/* Query Desk Input & Quick Chips */}
-      <div className="desk-label text-xs text-ink-soft mb-2.5">— research desk</div>
+      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-brass flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-brass"></span>
+          Natural Language Financial Inquiry
+        </span>
+        {!queryInput && (
+          <span className="text-[11px] font-mono text-ink-soft bg-paper-inset px-2.5 py-0.5 rounded-full border border-rule flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            Featured USP Case File: <b className="text-ink">{selectedSymbol}</b> ({selectedDate || 'Budget Shock'}) · Live News &amp; Price Sentiment
+          </span>
+        )}
+      </div>
 
-      <form onSubmit={handleRunQuery} className="query-row flex border-b-2 border-ink pb-2.5 items-baseline">
+      <form onSubmit={handleRunQuery} className="query-row flex bg-paper border border-rule focus-within:border-brass focus-within:ring-1 focus-within:ring-brass rounded-lg px-4 py-2.5 items-center shadow-sm transition-all gap-3">
         <input
           id="queryInput"
           type="text"
           value={queryInput}
           onChange={(e) => setQueryInput(e.target.value)}
-          placeholder="why is TCS falling this week"
-          className="flex-1 bg-transparent border-none outline-none font-serif text-xl text-ink placeholder:italic placeholder:text-ink-soft"
+          placeholder="Ask in plain language, e.g. 'Why did SBI surge?', 'Why is TCS moving?', 'Why did HDFC Bank fall?'"
+          className="flex-1 bg-transparent border-none outline-none text-base text-ink placeholder:text-ink-soft/60"
         />
         <button
           type="submit"
-          className="font-sans text-sm font-semibold text-ink hover:text-brass cursor-pointer pl-3"
+          disabled={isInvestigating}
+          className="bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg transition-all cursor-pointer shrink-0 shadow-xs active:scale-98 disabled:opacity-80 flex items-center gap-1.5"
         >
-          Ask →
+          {isInvestigating ? (
+            <>
+              <svg className="w-3.5 h-3.5 animate-spin text-slate-950" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+              </svg>
+              <span>Analyzing Query…</span>
+            </>
+          ) : (
+            <span>Investigate Move →</span>
+          )}
         </button>
       </form>
 
       {/* Quick Pick Chips */}
-      <div className="chips flex gap-2.5 mt-3.5 flex-wrap">
+      <div className="chips flex gap-2 mt-3 flex-wrap items-center">
+        <span className="text-xs text-ink-soft mr-1">Trending USP:</span>
         {[
-          { sym: 'NIFTYBANK', label: 'Nifty Bank' },
+          { sym: 'SBIN', label: 'SBI (SBIN)' },
           { sym: 'TCS', label: 'TCS' },
-          { sym: 'INFY', label: 'Infosys' },
-          { sym: 'RELIANCE', label: 'Reliance' },
           { sym: 'HDFCBANK', label: 'HDFC Bank' },
+          { sym: 'NIFTYBANK', label: 'Nifty Bank' },
+          { sym: 'NIFTY', label: 'Nifty 50' },
         ].map((c) => (
           <button
             key={c.sym}
             type="button"
             onClick={() => handleSelectChip(c.sym)}
-            className={`text-xs px-3 py-1.5 border transition-colors ${
+            disabled={isInvestigating}
+            className={`text-xs px-3 py-1 rounded-full border transition-all ${
               selectedSymbol === c.sym
-                ? 'border-ink text-ink bg-brass-soft font-medium'
-                : 'border-rule text-ink-soft bg-paper-inset hover:border-ink hover:text-ink'
-            }`}
+                ? 'border-brass bg-brass text-white font-semibold shadow-sm'
+                : 'border-rule text-ink-soft bg-paper hover:border-brass/40 hover:text-ink'
+            } disabled:opacity-50`}
           >
             {c.label}
           </button>
@@ -240,15 +299,26 @@ export const ResearchDeskPage: React.FC = () => {
         </div>
       )}
 
+      {/* Active AI Investigation Loader Banner */}
+      {isInvestigating && (
+        <InvestigationLoader
+          query={investigatingQueryText}
+          symbol={selectedSymbol}
+          onCancel={() => setIsInvestigating(false)}
+        />
+      )}
+
       {/* Result Dossier */}
       <div id="dossier" className="mt-9 print-page">
         {/* Case Number, Date Controls & Actions */}
-        <div className="flex justify-between items-center mb-2.5 flex-wrap gap-2">
-          <div className="case-no text-xs text-ink-soft tracking-wide flex items-center flex-wrap gap-2">
-            <span>Dossier No. {selectedSymbol === 'NIFTYBANK' ? '0416' : '0417'} — Event Observation</span>
+        <div className="flex justify-between items-center mb-4 flex-wrap gap-3 pb-3 border-b border-rule">
+          <div className="case-no text-xs text-ink-soft tracking-wide flex items-center flex-wrap gap-2.5">
+            <span className="font-semibold text-ink">
+              Dossier No. {selectedSymbol === 'NIFTYBANK' ? '0416' : '0417'}
+            </span>
             <span className="text-rule hidden sm:inline">|</span>
-            <label className="flex items-center space-x-1.5 font-sans text-xs text-ink">
-              <span className="text-ink-soft">Date:</span>
+            <label className="flex items-center space-x-1.5 text-xs text-ink">
+              <span className="text-ink-soft font-medium">Exact Date:</span>
               <input
                 type="date"
                 value={selectedDate}
@@ -256,7 +326,7 @@ export const ResearchDeskPage: React.FC = () => {
                   setSelectedDate(e.target.value);
                   queryClient.invalidateQueries({ queryKey: ['explanation'] });
                 }}
-                className="border border-rule px-2 py-0.5 bg-paper text-ink text-xs rounded-sm focus:border-ink outline-none"
+                className="border border-rule px-2.5 py-1 bg-paper text-ink text-xs rounded-md focus:border-brass outline-none"
                 title="Specify any exact date"
               />
             </label>
@@ -267,31 +337,31 @@ export const ResearchDeskPage: React.FC = () => {
                   setSelectedDate(e.target.value);
                   queryClient.invalidateQueries({ queryKey: ['explanation'] });
                 }}
-                className="border border-rule px-2 py-0.5 bg-paper text-ink text-xs rounded-sm focus:border-ink outline-none cursor-pointer"
+                className="border border-rule px-2.5 py-1 bg-paper text-ink text-xs rounded-md focus:border-brass outline-none cursor-pointer"
                 title="Select a detected event date"
               >
                 {anomalies.map((a) => (
                   <option key={a.date} value={a.date}>
-                    Event: {a.date} ({a.returnPct > 0 ? `+${a.returnPct.toFixed(2)}%` : `${a.returnPct.toFixed(2)}%`})
+                    Shock: {a.date} ({a.returnPct > 0 ? `+${a.returnPct.toFixed(2)}%` : `${a.returnPct.toFixed(2)}%`})
                   </option>
                 ))}
               </select>
             )}
           </div>
-          <div className="flex items-center space-x-3 text-xs non-printable">
+          <div className="flex items-center space-x-2.5 text-xs non-printable">
             <button
               onClick={handleToggleWatchlist}
-              className={`flex items-center space-x-1 px-2.5 py-1 border transition-colors ${
-                isInWatchlist ? 'border-brass text-brass bg-paper-inset' : 'border-rule text-ink-soft hover:border-ink'
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md border text-xs font-medium transition-all ${
+                isInWatchlist ? 'border-brass text-brass bg-brass-soft font-semibold' : 'border-rule text-ink-soft hover:border-ink hover:text-ink bg-paper'
               }`}
             >
-              <span>{isInWatchlist ? '★ In Watchlist' : '☆ Watch'}</span>
+              <span>{isInWatchlist ? '★ In Watchlist' : '☆ Add to Watchlist'}</span>
             </button>
             <button
               onClick={() => window.print()}
-              className="px-2.5 py-1 border border-rule text-ink-soft hover:border-ink"
+              className="px-3 py-1.5 border border-rule rounded-md text-ink-soft hover:text-ink hover:border-ink bg-paper transition-all font-medium"
             >
-              Export Case File ⎘
+              Export Dossier ⎘
             </button>
           </div>
         </div>
@@ -313,10 +383,14 @@ export const ResearchDeskPage: React.FC = () => {
             </div>
             <div
               className={`change text-sm font-semibold tabular-nums change-draw ${
-                isGain ? 'text-gain' : 'text-loss'
+                returnPct === null
+                  ? 'text-ink-soft'
+                  : isGain
+                  ? 'text-gain'
+                  : 'text-loss'
               }`}
             >
-              {isGain ? '▲' : '▼'} {changeStr}
+              {returnPct !== null ? (isGain ? '▲ ' : '▼ ') : ''}{changeStr}
             </div>
           </div>
         </div>
@@ -364,14 +438,14 @@ export const ResearchDeskPage: React.FC = () => {
         />
 
         {/* Signal Ledger: Three-Column Card */}
-        <div className="ledger grid grid-cols-1 md:grid-cols-3 border-t border-ink border-b border-rule my-6">
+        <div className="ledger tv-card grid grid-cols-1 md:grid-cols-3 my-6 shadow-sm overflow-hidden">
           {/* Col 1: Price Regime */}
-          <div className="ledger-col p-4 md:border-r border-b md:border-b-0 border-rule">
-            <div className="col-label text-[11px] text-ink-soft mb-2 uppercase tracking-wide">
-              — <GlossaryTerm termKey="regime">Price Regime</GlossaryTerm>
+          <div className="ledger-col p-5 md:border-r border-b md:border-b-0 border-rule">
+            <div className="col-label text-[11px] font-bold text-ink-soft mb-2 uppercase tracking-wider">
+              <GlossaryTerm termKey="regime">Price Regime</GlossaryTerm>
             </div>
             <div
-              className={`col-value font-serif text-xl font-medium ${
+              className={`col-value text-2xl font-bold ${
                 explanation?.priceDirection === 'bullish'
                   ? 'text-gain'
                   : explanation?.priceDirection === 'bearish'
@@ -380,56 +454,63 @@ export const ResearchDeskPage: React.FC = () => {
               }`}
             >
               {explanation?.priceDirection === 'bullish'
-                ? 'Bullish'
+                ? '▲ Bullish'
                 : explanation?.priceDirection === 'bearish'
-                ? 'Bearish'
-                : 'Consolidating'}
+                ? '▼ Bearish'
+                : explanation?.priceDirection === 'consolidating'
+                ? '● Consolidating'
+                : explanation?.priceDirection === 'neutral'
+                ? '● Neutral'
+                : (explanation ? '● Neutral' : 'No Regime Data')}
             </div>
-            <div className="col-sub text-xs text-ink-soft mt-1">
+            <div className="col-sub text-xs text-ink-soft mt-1.5">
               <GlossaryTerm termKey="z-score">z-score</GlossaryTerm>{' '}
-              {explanation
-                ? typeof explanation.returnZ === 'number'
-                  ? (explanation.returnZ > 0 ? `+${explanation.returnZ.toFixed(2)}` : `${explanation.returnZ.toFixed(2)}`)
-                  : explanation.returnZ
-                : '-2.20'}{' '}
-              · 60-day window
+              <span className="font-mono font-medium">
+                {explanation && explanation.returnZ !== undefined && explanation.returnZ !== null
+                  ? typeof explanation.returnZ === 'number'
+                    ? (explanation.returnZ > 0 ? `+${explanation.returnZ.toFixed(2)}` : `${explanation.returnZ.toFixed(2)}`)
+                    : explanation.returnZ
+                  : 'N/A'}
+              </span>{' '}
+              · 60-day baseline
             </div>
           </div>
 
           {/* Col 2: News Sentiment */}
-          <div className="ledger-col p-4 md:border-r border-b md:border-b-0 border-rule">
-            <div className="col-label text-[11px] text-ink-soft mb-2 uppercase tracking-wide">
-              — <GlossaryTerm termKey="sentiment">News Sentiment</GlossaryTerm>
+          <div className="ledger-col p-5 md:border-r border-b md:border-b-0 border-rule">
+            <div className="col-label text-[11px] font-bold text-ink-soft mb-2 uppercase tracking-wider">
+              <GlossaryTerm termKey="sentiment">News Sentiment</GlossaryTerm>
             </div>
-            <div className="col-value font-serif text-xl font-medium text-ink">
+            <div className="col-value text-2xl font-bold text-ink">
               {explanation?.newsDirection
                 ? explanation.newsDirection.replace(/_/g, ' ').toUpperCase()
                 : 'NO NEWS AVAILABLE'}
             </div>
-            <div className="col-sub text-xs text-ink-soft mt-1">
+            <div className="col-sub text-xs text-ink-soft mt-1.5">
               {explanation?.newsDirection === 'no_news_available'
                 ? 'No verified news articles found for date'
                 : explanation?.newsDirection === 'retrieval_failed'
                 ? 'Online news retrieval was unavailable'
                 : explanation?.hasClearDriver
                 ? 'Verified press drivers identified'
-                : 'No clear narrative in news'}
+                : explanation
+                ? 'No clear narrative in news'
+                : 'No news data available'}
             </div>
-
           </div>
 
           {/* Col 3: Signal Agreement Meter */}
-          <div className="ledger-col p-4">
-            <div className="col-label text-[11px] text-ink-soft mb-2 uppercase tracking-wide">
-              — <GlossaryTerm termKey="signal agreement">Signal Agreement</GlossaryTerm>
+          <div className="ledger-col p-5">
+            <div className="col-label text-[11px] font-bold text-ink-soft mb-2 uppercase tracking-wider">
+              <GlossaryTerm termKey="signal agreement">Signal Agreement</GlossaryTerm>
             </div>
             <div className="flex items-center space-x-2">
               <span
-                className={`text-xs font-semibold px-2 py-0.5 rounded-sm ${
+                className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                   explanation?.signalAgreement === 'aligned'
-                    ? 'bg-[rgb(var(--c-tint))] text-gain'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                     : explanation?.signalAgreement === 'diverging'
-                    ? 'bg-[rgb(var(--c-losstint))] text-loss'
+                    ? 'bg-rose-50 text-rose-700 border border-rose-200'
                     : 'bg-paper-inset text-ink-soft border border-rule'
                 }`}
               >
@@ -439,24 +520,26 @@ export const ResearchDeskPage: React.FC = () => {
               </span>
             </div>
             {/* Agreement Meter Bar */}
-            <div className="meter mt-2.5 h-1.5 bg-[#DADCCF] rounded-sm overflow-hidden">
+            <div className="meter mt-3 h-2 bg-rule/50 rounded-full overflow-hidden">
               <div
-                className="meter-fill-anim h-full bg-brass rounded-sm"
+                className="meter-fill-anim h-full bg-brass rounded-full"
                 style={{
                   '--meter-target':
                     explanation?.signalAgreement === 'aligned'
                       ? '85%'
                       : explanation?.signalAgreement === 'diverging'
                       ? '35%'
-                      : '15%',
+                      : explanation?.signalAgreement === 'insufficient'
+                      ? '15%'
+                      : '0%',
                 } as React.CSSProperties}
               />
             </div>
-            <div className="col-sub text-xs text-ink-soft mt-1">
+            <div className="col-sub text-xs text-ink-soft mt-1.5">
               {explanation?.signalAgreement === 'aligned'
-                ? 'Price and sentiment point same way'
+                ? 'Price momentum and news tone confirm each other'
                 : explanation?.signalAgreement === 'diverging'
-                ? 'Price action diverges from news tone'
+                ? 'Price action diverges from prevailing news tone'
                 : 'Insufficient evidence to form consensus'}
             </div>
           </div>
@@ -464,23 +547,24 @@ export const ResearchDeskPage: React.FC = () => {
 
         {/* Explanation Section */}
         {loadingExplanation ? (
-          <div className="p-8 text-center text-ink-soft italic text-sm">
-            Reviewing the case file…
-          </div>
+          <InvestigationLoader
+            query={investigatingQueryText || `Investigating ${selectedSymbol} (${selectedDate || 'Selected Window'})`}
+            symbol={selectedSymbol}
+          />
         ) : explanation ? (
-          <div id="explanation-section" className="explanation-section my-6">
-            <div className="explain-head flex justify-between items-baseline mb-3">
-              <h2 className="font-serif text-xl font-medium text-ink">
+          <div id="explanation-section" className="explanation-section tv-card p-6 my-6 shadow-sm">
+            <div className="explain-head flex justify-between items-baseline mb-4 pb-3 border-b border-rule flex-wrap gap-2">
+              <h2 className="text-xl font-bold text-ink">
                 {explanation.hasClearDriver ? 'Causal Analysis' : 'Engine Finding: Insufficient Driver'}
               </h2>
-              <div className="confidence text-xs text-ink-soft flex items-center gap-2">
+              <div className="confidence text-xs text-ink-soft flex items-center gap-2 flex-wrap">
                 {explanation.validationStatus && (
                   <span
-                    className={`font-mono px-1.5 py-0.5 rounded text-[10px] uppercase font-semibold ${
+                    className={`font-mono px-2 py-0.5 rounded text-[10px] uppercase font-bold ${
                       explanation.validationStatus === 'VALID'
-                        ? 'bg-[#DCE9E2] text-gain'
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                         : explanation.validationStatus === 'PARTIALLY_VALID'
-                        ? 'bg-[#F9EDD5] text-[#8C6D1F]'
+                        ? 'bg-amber-100 text-amber-800 border border-amber-300'
                         : 'bg-paper-inset text-ink-soft border border-rule'
                     }`}
                   >
@@ -491,21 +575,20 @@ export const ResearchDeskPage: React.FC = () => {
                   <GlossaryTerm termKey="confidence">Confidence</GlossaryTerm>: <b className="text-ink uppercase">{explanation.confidence}</b>
                 </span>
                 {explanation.causalCategory && (
-                  <span className="font-mono text-brass">
+                  <span className="font-mono text-brass font-semibold">
                     [<GlossaryTerm termKey="causal category">{explanation.causalCategory}</GlossaryTerm>]
                   </span>
                 )}
               </div>
-
             </div>
 
             {/* Distinct First-Class Abstention State */}
             {!explanation.hasClearDriver ? (
-              <div className="abstention-box border border-rule bg-paper-inset p-5 my-4">
+              <div className="abstention-box border border-rule bg-paper-inset p-5 my-4 rounded-md">
                 <div className="flex items-start space-x-3">
-                  <div className="text-brass text-lg font-serif">§</div>
+                  <div className="text-brass text-lg font-bold">§</div>
                   <div>
-                    <h3 className="font-serif text-base font-medium text-ink mb-1">
+                    <h3 className="text-base font-bold text-ink mb-1">
                       Honest Abstention — No Confirmed Driver
                     </h3>
                     <p className="text-sm text-ink leading-relaxed">
@@ -605,40 +688,66 @@ export const ResearchDeskPage: React.FC = () => {
               </div>
             </div>
           </div>
-        ) : null}
+        ) : (
+          <div className="tv-card p-8 text-center text-ink-soft my-6 shadow-sm border border-dashed border-rule rounded-2xl bg-paper-inset/40">
+            <div className="font-serif text-base font-semibold text-ink mb-1.5">
+              No Recorded Causal Dossier for {selectedSymbol} ({selectedDate || 'Selected Window'})
+            </div>
+            <p className="text-xs text-ink-soft max-w-lg mx-auto leading-relaxed">
+              MarketMind strictly enforces zero fake data: narrative explanations and signal agreement are generated exclusively for our tracked USP instruments (<b>SBI</b>, <b>TCS</b>, <b>HDFC Bank</b>, and <b>NIFTY</b>). Real-time price tracking and technical charts remain available for all Indian equities in your Watchlist.
+            </p>
+          </div>
+        )}
 
         {/* Similar Historical Instances Table */}
         <div className="section-label text-[11px] text-ink-soft mt-9 mb-3">— Similar Historical Instances</div>
-        <table className="instances w-full border-collapse text-xs">
-          <thead>
-            <tr className="border-b border-ink">
-              <th className="text-left font-semibold text-ink-soft py-2 pr-3">Window</th>
-              <th className="text-left font-semibold text-ink-soft py-2 pr-3">Pattern Match</th>
-              <th className="text-left font-semibold text-ink-soft py-2 pr-3">Historical Outcome</th>
-              <th className="text-left font-semibold text-ink-soft py-2">Rebound</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-b border-rule">
-              <td className="py-2.5 pr-3 font-mono">Feb 2026</td>
-              <td className="py-2.5 pr-3">Budget announcement yield reaction</td>
-              <td className="py-2.5 pr-3">Stabilized after 3 sessions</td>
-              <td className="py-2.5 font-semibold text-gain">Yes</td>
-            </tr>
-            <tr className="border-b border-rule">
-              <td className="py-2.5 pr-3 font-mono">Jul 2026</td>
-              <td className="py-2.5 pr-3">Crude shock geopolitical divergence</td>
-              <td className="py-2.5 pr-3">Extended decline 4 more sessions</td>
-              <td className="py-2.5 font-semibold text-loss">No</td>
-            </tr>
-            <tr className="border-b border-rule">
-              <td className="py-2.5 pr-3 font-mono">Jun 2026</td>
-              <td className="py-2.5 pr-3">Ceasefire risk-on expansion</td>
-              <td className="py-2.5 pr-3">Rallied 5 sessions</td>
-              <td className="py-2.5 font-semibold text-gain">Yes</td>
-            </tr>
-          </tbody>
-        </table>
+        {(() => {
+          const recordedAnomalies = (anomalies || []).filter((a) => a.date !== selectedDate);
+          if (recordedAnomalies.length === 0) {
+            return (
+              <div className="p-4 rounded-xl border border-rule bg-paper-inset text-xs text-ink-soft italic">
+                No similar historical instances or recorded anomalies found for {selectedSymbol} in the observed window.
+              </div>
+            );
+          }
+          return (
+            <table className="instances w-full border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-ink">
+                  <th className="text-left font-semibold text-ink-soft py-2 pr-3">Date Window</th>
+                  <th className="text-left font-semibold text-ink-soft py-2 pr-3">Pattern Match</th>
+                  <th className="text-left font-semibold text-ink-soft py-2 pr-3">Historical Move</th>
+                  <th className="text-left font-semibold text-ink-soft py-2">Direction</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recordedAnomalies.slice(0, 5).map((a) => {
+                  const isBullish = a.direction === 'bullish' || a.returnPct >= 0;
+                  return (
+                    <tr
+                      key={a.date}
+                      onClick={() => {
+                        setSelectedDate(a.date);
+                        queryClient.invalidateQueries({ queryKey: ['explanation'] });
+                      }}
+                      className="border-b border-rule hover:bg-paper-inset/60 cursor-pointer transition-colors"
+                      title="Click to inspect this historical instance"
+                    >
+                      <td className="py-2.5 pr-3 font-mono font-medium">{a.date}</td>
+                      <td className="py-2.5 pr-3">{a.label || 'Market Dislocation'}</td>
+                      <td className={`py-2.5 pr-3 font-mono font-semibold ${isBullish ? 'text-gain' : 'text-loss'}`}>
+                        {a.returnPct > 0 ? `+${a.returnPct.toFixed(2)}%` : `${a.returnPct.toFixed(2)}%`} (z: {a.returnZ.toFixed(2)})
+                      </td>
+                      <td className={`py-2.5 font-semibold ${isBullish ? 'text-gain' : 'text-loss'}`}>
+                        {isBullish ? 'Bullish' : 'Bearish'}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          );
+        })()}
 
         {/* Verbatim Disclaimer Footer */}
         <footer className="mt-12 pt-4 border-t border-rule text-xs text-ink-soft leading-relaxed">

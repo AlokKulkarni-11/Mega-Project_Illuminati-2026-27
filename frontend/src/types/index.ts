@@ -9,7 +9,8 @@ export interface AuthResponse {
   token: string;
   tokenType: string;
   expiresInMs: number;
-  user: User;
+  user: User | null;
+  needsEmailVerification?: boolean;
 }
 
 export type EngineStatus = 'HEALTHY' | 'DEGRADED' | 'UNAVAILABLE' | 'DISABLED';
@@ -138,6 +139,22 @@ export interface WatchlistItem {
   regime?: string;
   agreement?: string;
   createdAt: string;
+  price?: number;
+  change?: number;
+  changePercent?: number;
+  dayHigh?: number;
+  dayLow?: number;
+  volume?: number;
+  sector?: string;
+  hasSentimentUsp?: boolean;
+}
+
+export interface StockDirectoryItem {
+  symbol: string;
+  name: string;
+  basePrice: number;
+  sector: string;
+  hasSentimentUsp: boolean;
 }
 
 export interface QueryHistoryItem {

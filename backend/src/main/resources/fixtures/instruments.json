@@ -28,5 +28,17 @@
     "name": "HDFC Bank Limited",
     "type": "stock",
     "sector": "Banking & Financial Services"
+  },
+  {
+    "symbol": "SBIN",
+    "name": "State Bank of India",
+    "type": "stock",
+    "sector": "Banking & Financial Services"
+  },
+  {
+    "symbol": "NIFTY",
+    "name": "Nifty 50 Benchmark",
+    "type": "index",
+    "sector": "Benchmark Index"
   }
 ]

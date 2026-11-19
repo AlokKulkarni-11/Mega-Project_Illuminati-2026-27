@@ -9,8 +9,17 @@ import java.util.UUID;
 public class UserEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
+
+    @PrePersist
+    public void ensureId() {
+        if (this.id == null) {
+            this.id = UUID.randomUUID();
+        }
+        if (this.createdAt == null) {
+            this.createdAt = Instant.now();
+        }
+    }
 
     @Column(nullable = false, unique = true)
     private String email;

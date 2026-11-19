@@ -10,7 +10,7 @@ export const MarketGauge: React.FC<MarketGaugeProps> = ({ score, label }) => {
   const s = Math.max(0, Math.min(100, score));
   const deg = (s / 100) * 180; // 0 = pointing left, 180 = pointing right
   return (
-    <div className="flex items-center gap-6 flex-wrap p-4 bg-paper-inset border border-rule">
+    <div className="flex items-center gap-6 flex-wrap p-5 bg-paper tv-card shadow-sm">
       <svg viewBox="0 0 300 175" className="w-full max-w-[300px]" role="img"
         aria-label={`Market sentiment dial: ${label}, ${s.toFixed(0)} out of 100`}>
         <path d="M30,150A120,120 0 0 1 270,150" fill="none" stroke="rgb(var(--c-rule))" strokeWidth="10" />

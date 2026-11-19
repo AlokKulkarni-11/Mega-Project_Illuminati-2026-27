@@ -1,64 +1,89 @@
+@import './modes.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Light = "Paper", Dark = "Night ledger" (green). Triplets so Tailwind opacity works. */
-:root {
-  --c-paper: 231 233 222;
-  --c-inset: 250 250 247;
-  --c-ink: 27 43 34;
-  --c-soft: 75 90 80;
-  --c-rule: 198 203 188;
-  --c-loss: 139 46 31;
-  --c-gain: 31 78 61;
-  --c-brass: 168 130 60;
-  --c-bs: 233 220 193;
-  --c-tint: 220 233 226;
-  --c-losstint: 241 220 213;
+/* 
+ * Professional Financial Light Aesthetic
+ * Soft Slate (#1E293B) + Forest/Emerald Accent (#059669) + Crisp Slate-200 Borders
+ * ZERO black, ZERO harsh dark fills, ZERO electric blue.
+ */
+:root,
+:root[data-theme='light'] {
+  --c-paper: 248 250 252;       /* #F8FAFC Clean luminous canvas */
+  --c-inset: 255 255 255;       /* #FFFFFF Pure white card surfaces */
+  --c-subtle: 241 245 249;      /* #F1F5F9 Slate-100 hover / wells */
+  --c-ink: 15 23 42;            /* #0F172A Slate-900 deep crisp readable text */
+  --c-soft: 51 65 85;           /* #334155 Slate-700 clear high-contrast secondary text */
+  --c-rule: 203 213 225;        /* #CBD5E1 Slate-300 crisp border */
+  --c-loss: 225 29 72;          /* #E11D48 Rose-600 financial loss */
+  --c-gain: 5 150 105;          /* #059669 Emerald-600 financial gain */
+  --c-brass: 217 119 6;         /* #D97706 Amber-600 primary brand accent */
+  --c-bs: 254 243 199;          /* #FEF3C7 Amber-50 badge background */
+  --c-tint: 236 253 245;        /* #ECFDF5 Emerald-50 gain tint */
+  --c-losstint: 255 241 242;    /* #FFF1F2 Rose-50 loss tint */
   color-scheme: light;
 }
+
+:root.dark,
 :root[data-theme='dark'] {
-  --c-paper: 20 28 23;
-  --c-inset: 28 38 32;
-  --c-ink: 228 231 218;
-  --c-soft: 163 174 159;
-  --c-rule: 52 66 58;
-  --c-loss: 228 138 118;
-  --c-gain: 111 196 154;
-  --c-brass: 201 165 90;
-  --c-bs: 58 51 34;
-  --c-tint: 31 52 42;
-  --c-losstint: 61 34 28;
+  --c-paper: 15 23 42;          /* #0F172A Slate-900 */
+  --c-inset: 30 41 59;          /* #1E293B Slate-800 */
+  --c-subtle: 51 65 85;         /* #334155 Slate-700 */
+  --c-ink: 241 245 249;         /* #F1F5F9 Slate-100 */
+  --c-soft: 148 163 184;        /* #94A3B8 Slate-400 */
+  --c-rule: 51 65 85;           /* #334155 */
+  --c-loss: 244 63 94;          /* #F43F5E */
+  --c-gain: 16 185 129;         /* #10B981 */
+  --c-brass: 16 185 129;        /* #10B981 */
+  --c-bs: 6 78 59;
+  --c-tint: 6 78 59;
+  --c-losstint: 76 5 25;
   color-scheme: dark;
 }
-:root[data-theme='auto'] { color-scheme: light dark; }
-@media (prefers-color-scheme: dark) {
-  :root[data-theme='auto'] {
-  --c-paper: 20 28 23;
-  --c-inset: 28 38 32;
-  --c-ink: 228 231 218;
-  --c-soft: 163 174 159;
-  --c-rule: 52 66 58;
-  --c-loss: 228 138 118;
-  --c-gain: 111 196 154;
-  --c-brass: 201 165 90;
-  --c-bs: 58 51 34;
-  --c-tint: 31 52 42;
-  --c-losstint: 61 34 28;
-  }
+
+html.dark {
+  color-scheme: dark;
+}
+
+html:not(.dark) {
+  color-scheme: light;
 }
 
 body {
   background-color: rgb(var(--c-paper));
   color: rgb(var(--c-ink));
-  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 15px;
-  line-height: 1.55;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle slate dot pattern */
+.bg-dot-pattern {
+  background-image: radial-gradient(rgba(100, 116, 139, 0.12) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* Clean cards with soft slate border and gentle shadow */
+.tv-card, .bento-card {
+  background-color: rgb(var(--c-inset));
+  border: 1px solid rgb(var(--c-rule));
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tv-card:hover, .bento-card:hover {
+  border-color: rgba(5, 150, 105, 0.35);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.04);
 }
 
 /* Price underline animation */
@@ -70,11 +95,11 @@ body {
   content: "";
   position: absolute;
   left: 0;
-  bottom: -3px;
+  bottom: -2px;
   height: 2px;
   width: 0%;
   background: currentColor;
-  animation: drawLine 900ms 300ms ease forwards;
+  animation: drawLine 800ms 200ms ease forwards;
 }
 
 @keyframes drawLine {
@@ -85,7 +110,7 @@ body {
 
 /* Agreement meter animation */
 .meter-fill-anim {
-  animation: fillMeter 1100ms 400ms cubic-bezier(.2, .8, .2, 1) forwards;
+  animation: fillMeter 1000ms 300ms cubic-bezier(.2, .8, .2, 1) forwards;
 }
 
 @keyframes fillMeter {

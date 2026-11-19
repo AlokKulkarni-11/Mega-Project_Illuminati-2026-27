@@ -1,0 +1,249 @@
+/* ==========================================================================
+   MARKETMIND DUAL-MODE THEME STYLESHEET
+   Explicit, fully separated CSS rules for Light Mode and Dark Mode.
+   Guarantees zero bleed-through, zero unreadable text, and zero dark cards
+   in White Mode.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. LIGHT MODE (TradingView White / Crisp Financial Canvas)
+   Active when: data-theme="light", html.light, or html:not(.dark)
+   -------------------------------------------------------------------------- */
+:root,
+html[data-theme='light'],
+html.light,
+html:not(.dark) {
+  /* Surface Tokens */
+  --c-paper: 248 250 252;          /* #F8FAFC crisp luminous canvas */
+  --c-inset: 255 255 255;          /* #FFFFFF pure white card surfaces */
+  --c-subtle: 241 245 249;         /* #F1F5F9 light slate wells / tab track */
+  --c-ink: 15 23 42;               /* #0F172A high-contrast slate-900 text */
+  --c-soft: 51 65 85;              /* #334155 high-contrast slate-700 secondary text */
+  --c-rule: 226 232 240;           /* #E2E8F0 subtle slate border */
+  --c-loss: 225 29 72;             /* #E11D48 rose-600 financial loss */
+  --c-gain: 5 150 105;             /* #059669 emerald-600 financial gain */
+  --c-brass: 217 119 6;            /* #D97706 amber-600 brand accent */
+  --c-bs: 254 243 199;             /* #FEF3C7 amber-50 pill bg */
+  --c-tint: 236 253 245;           /* #ECFDF5 emerald-50 */
+  --c-losstint: 255 241 242;       /* #FFF1F2 rose-50 */
+  color-scheme: light;
+}
+
+/* Light Mode Explicit Component Styles */
+html[data-theme='light'] body,
+html.light body,
+html:not(.dark) body {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+/* Card surfaces in Light Mode */
+html[data-theme='light'] .tv-card,
+html[data-theme='light'] .bento-card,
+html[data-theme='light'] .calc-card,
+html.light .tv-card,
+html.light .bento-card,
+html.light .calc-card,
+html:not(.dark) .tv-card,
+html:not(.dark) .bento-card,
+html:not(.dark) .calc-card {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.03) !important;
+}
+
+/* Tab tracks & wells in Light Mode */
+html[data-theme='light'] .tab-track,
+html.light .tab-track,
+html:not(.dark) .tab-track {
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Active tab pill in Light Mode */
+html[data-theme='light'] .tab-pill-active,
+html.light .tab-pill-active,
+html:not(.dark) .tab-pill-active {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.05) !important;
+}
+
+/* Inactive tab pill in Light Mode */
+html[data-theme='light'] .tab-pill-inactive,
+html.light .tab-pill-inactive,
+html:not(.dark) .tab-pill-inactive {
+  color: #475569 !important;
+}
+html[data-theme='light'] .tab-pill-inactive:hover,
+html.light .tab-pill-inactive:hover,
+html:not(.dark) .tab-pill-inactive:hover {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  color: #0f172a !important;
+}
+
+/* Headings in Light Mode */
+html[data-theme='light'] .page-heading,
+html.light .page-heading,
+html:not(.dark) .page-heading {
+  color: #0f172a !important;
+}
+
+html[data-theme='light'] .page-subheading,
+html.light .page-subheading,
+html:not(.dark) .page-subheading {
+  color: #475569 !important;
+}
+
+/* Input boxes in Light Mode */
+html[data-theme='light'] .calc-input-box,
+html.light .calc-input-box,
+html:not(.dark) .calc-input-box {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+html[data-theme='light'] .calc-input-box:focus,
+html.light .calc-input-box:focus,
+html:not(.dark) .calc-input-box:focus {
+  border-color: #d97706 !important;
+  background-color: #ffffff !important;
+}
+
+/* Preset buttons in Light Mode */
+html[data-theme='light'] .preset-btn,
+html.light .preset-btn,
+html:not(.dark) .preset-btn {
+  background-color: #f1f5f9 !important;
+  color: #334155 !important;
+  border-color: #e2e8f0 !important;
+}
+html[data-theme='light'] .preset-btn:hover,
+html.light .preset-btn:hover,
+html:not(.dark) .preset-btn:hover {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+  border-color: #fcd34d !important;
+}
+
+/* Large metric numbers in Light Mode */
+html[data-theme='light'] .metric-display,
+html.light .metric-display,
+html:not(.dark) .metric-display {
+  color: #0f172a !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. DARK MODE (TradingView Slate / Professional Night Desk)
+   Active when: data-theme="dark" OR html.dark
+   -------------------------------------------------------------------------- */
+html[data-theme='dark'],
+html.dark {
+  /* Surface Tokens */
+  --c-paper: 15 23 42;             /* #0F172A slate-900 canvas */
+  --c-inset: 30 41 59;             /* #1E293B slate-800 card surface */
+  --c-subtle: 51 65 85;            /* #334155 slate-700 wells */
+  --c-ink: 248 250 252;            /* #F8FAFC slate-50 high-contrast text */
+  --c-soft: 148 163 184;           /* #94A3B8 slate-400 secondary text */
+  --c-rule: 51 65 85;              /* #334155 slate-700 border */
+  --c-loss: 244 63 94;             /* #F43F5E rose-500 */
+  --c-gain: 16 185 129;            /* #10B981 emerald-500 */
+  --c-brass: 245 158 11;           /* #F59E0B amber-500 */
+  --c-bs: 69 26 3;                 /* amber-950 */
+  --c-tint: 6 78 59;               /* emerald-950 */
+  --c-losstint: 76 5 25;           /* rose-950 */
+  color-scheme: dark;
+}
+
+/* Dark Mode Explicit Component Styles */
+html[data-theme='dark'] body,
+html.dark body {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+/* Card surfaces in Dark Mode */
+html[data-theme='dark'] .tv-card,
+html[data-theme='dark'] .bento-card,
+html[data-theme='dark'] .calc-card,
+html.dark .tv-card,
+html.dark .bento-card,
+html.dark .calc-card {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Tab tracks & wells in Dark Mode */
+html[data-theme='dark'] .tab-track,
+html.dark .tab-track {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+/* Active tab pill in Dark Mode */
+html[data-theme='dark'] .tab-pill-active,
+html.dark .tab-pill-active {
+  background-color: #334155 !important;
+  color: #ffffff !important;
+  border-color: #475569 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Inactive tab pill in Dark Mode */
+html[data-theme='dark'] .tab-pill-inactive,
+html.dark .tab-pill-inactive {
+  color: #94a3b8 !important;
+}
+html[data-theme='dark'] .tab-pill-inactive:hover,
+html.dark .tab-pill-inactive:hover {
+  background-color: #334155 !important;
+  color: #ffffff !important;
+}
+
+/* Headings in Dark Mode */
+html[data-theme='dark'] .page-heading,
+html.dark .page-heading {
+  color: #f8fafc !important;
+}
+
+html[data-theme='dark'] .page-subheading,
+html.dark .page-subheading {
+  color: #94a3b8 !important;
+}
+
+/* Input boxes in Dark Mode */
+html[data-theme='dark'] .calc-input-box,
+html.dark .calc-input-box {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+html[data-theme='dark'] .calc-input-box:focus,
+html.dark .calc-input-box:focus {
+  border-color: #f59e0b !important;
+  background-color: #0f172a !important;
+}
+
+/* Preset buttons in Dark Mode */
+html[data-theme='dark'] .preset-btn,
+html.dark .preset-btn {
+  background-color: #334155 !important;
+  color: #cbd5e1 !important;
+  border-color: #475569 !important;
+}
+html[data-theme='dark'] .preset-btn:hover,
+html.dark .preset-btn:hover {
+  background-color: #451a03 !important;
+  color: #fcd34d !important;
+  border-color: #b45309 !important;
+}
+
+/* Large metric numbers in Dark Mode */
+html[data-theme='dark'] .metric-display,
+html.dark .metric-display {
+  color: #ffffff !important;
+}
