@@ -126,10 +126,7 @@ public class MockInsightEngine implements InsightEngine {
         String sym = symbol.toUpperCase().trim();
         List<PricePointDto> points = priceMap.get(sym);
         if (points == null) {
-            points = priceMap.get("NIFTYBANK");
-            if (points == null) {
-                points = Collections.emptyList();
-            }
+            points = Collections.emptyList();
         }
 
         if (days > 0 && points.size() > days) {

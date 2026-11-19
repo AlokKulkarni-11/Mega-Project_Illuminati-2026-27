@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { CandleChart } from '../components/CandleChart';
 import { ChartControls } from '../components/ChartControls';
 import { aggregate, RANGE_DAYS, RangeKey, ChartType, Interval } from '../features/chart/chartUtils';
@@ -14,7 +15,7 @@ import {
   getAnomaliesApi,
   getExplanationApi,
 } from '../api/engine';
-import { addToWatchlistApi, checkWatchlistApi, removeFromWatchlistApi } from '../api/watchlist';
+import { addToWatchlistApi, checkWatchlistApi, removeFromWatchlistApi, getLiveChartPricesApi } from '../api/watchlist';
 import { resolveQueryApi } from '../api/query';
 import { submitFeedbackApi } from '../api/feedback';
 import { Anomaly } from '../types';
@@ -22,8 +23,10 @@ import { Anomaly } from '../types';
 export const ResearchDeskPage: React.FC = () => {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlParamSymbol = searchParams.get('symbol')?.toUpperCase().trim();
   const [queryInput, setQueryInput] = useState('');
-  const [selectedSymbol, setSelectedSymbol] = useState('SBIN');
+  const [selectedSymbol, setSelectedSymbol] = useState(urlParamSymbol || 'SBIN');
   const [selectedDate, setSelectedDate] = useState<string>('2026-09-15');
   const [isInvestigating, setIsInvestigating] = useState<boolean>(false);
   const [investigatingQueryText, setInvestigatingQueryText] = useState<string>('');
@@ -32,6 +35,18 @@ export const ResearchDeskPage: React.FC = () => {
   const [feedbackGiven, setFeedbackGiven] = useState<'helpful' | 'unhelpful' | null>(null);
   const [showSourcesTrail, setShowSourcesTrail] = useState(false);
   const [chartOpts, setChartOpts] = useState<{ range: RangeKey; interval: Interval; type: ChartType; sma: boolean; volume: boolean }>(() => ({ range: '6M', sma: true, volume: true, ...loadChartPrefs() }));
+
+  // Keep selectedSymbol synced with URL search params when user navigates or clicks links
+  useEffect(() => {
+    const sym = searchParams.get('symbol')?.toUpperCase().trim();
+    if (sym && sym !== selectedSymbol) {
+      setSelectedSymbol(sym);
+      setSelectedDate('');
+      queryClient.invalidateQueries({ queryKey: ['prices'] });
+      queryClient.invalidateQueries({ queryKey: ['anomalies'] });
+      queryClient.invalidateQueries({ queryKey: ['explanation'] });
+    }
+  }, [searchParams]);
 
   // Fetch instruments
   const { data: instruments } = useQuery({
@@ -55,10 +70,10 @@ export const ResearchDeskPage: React.FC = () => {
     }
   }, [anomalies, selectedDate]);
 
-  // Fetch price history
+  // Fetch price history with live market endpoint fallback
   const { data: prices } = useQuery({
     queryKey: ['prices', selectedSymbol, 'chart'],
-    queryFn: () => getPricesApi(selectedSymbol, 260),
+    queryFn: () => getLiveChartPricesApi(selectedSymbol, 260),
   });
 
   // Fetch explanation for symbol + date
@@ -156,6 +171,7 @@ export const ResearchDeskPage: React.FC = () => {
 
       await pacingDelay();
       setSelectedSymbol(matchedSymbol);
+      setSearchParams({ symbol: matchedSymbol });
       setSelectedDate(targetDt || (matchedSymbol === 'NIFTYBANK' ? '2026-02-01' : '2026-09-15'));
       setEmptyNote(null);
       await Promise.all([
@@ -176,6 +192,7 @@ export const ResearchDeskPage: React.FC = () => {
 
   const handleSelectChip = (sym: string) => {
     setSelectedSymbol(sym);
+    setSearchParams({ symbol: sym });
     if (sym === 'NIFTYBANK') {
       setSelectedDate('2026-02-01');
     } else {
@@ -427,6 +444,7 @@ export const ResearchDeskPage: React.FC = () => {
         {/* Price chart */}
         <ChartControls {...chartOpts} onChange={(patch) => setChartOpts((o) => ({ ...o, ...patch }))} />
         <CandleChart
+          symbol={selectedSymbol}
           bars={aggregate((prices?.points || []).slice(-RANGE_DAYS[chartOpts.range]), chartOpts.interval)}
           type={chartOpts.type}
           showSma={chartOpts.sma}

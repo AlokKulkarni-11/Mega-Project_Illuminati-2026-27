@@ -10,12 +10,13 @@ interface Props {
   selectedDate?: string;
   onSelectAnomaly?: (date: string) => void;
   label: string;
+  symbol?: string;
 }
 
-const W = 820, H = 360, PL = 6, PR = 64, PT = 10, PB = 22;
+const W = 820, H = 360, PL = 6, PR = 72, PT = 10, PB = 22;
 const fmt = (n: number) => n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-export const CandleChart: React.FC<Props> = ({ bars, type, showSma, showVolume, anomalyDates = [], selectedDate, onSelectAnomaly, label }) => {
+export const CandleChart: React.FC<Props> = ({ bars, type, showSma, showVolume, anomalyDates = [], selectedDate, onSelectAnomaly, label, symbol }) => {
   const [hover, setHover] = useState<number | null>(null);
 
   const g = useMemo(() => {
@@ -38,15 +39,42 @@ export const CandleChart: React.FC<Props> = ({ bars, type, showSma, showVolume, 
   if (!g) return <div className="h-40 flex items-center justify-center text-xs italic text-ink-soft">Price data unavailable for this window.</div>;
   const { ph, hi, lo, step, cw, y, x, maxVol, ma, volH } = g;
   const cur = bars[hover ?? bars.length - 1];
+  const firstBar = bars[0];
+  const lastBar = bars[bars.length - 1];
+  const netChange = lastBar ? lastBar.close - firstBar.open : 0;
+  const netChangePct = firstBar?.open ? (netChange / firstBar.open) * 100 : 0;
   const tickEvery = Math.ceil(bars.length / 6);
   const line = bars.map((b, i) => `${i ? 'L' : 'M'}${x(i)},${y(b.close)}`).join('');
 
   return (
     <div className="chart-row tv-card p-4 my-4 shadow-sm">
+      {/* Visual Ticker & Metric Strip */}
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-2 mb-2 border-b border-rule/50 text-xs">
+        <div className="flex items-center gap-2">
+          {symbol && (
+            <span className="font-mono font-black text-sm px-2 py-0.5 rounded-md bg-paper-inset border border-rule text-ink">
+              {symbol}
+            </span>
+          )}
+          <span className="font-serif font-bold text-base text-ink tabular-nums">
+            ₹{fmt(lastBar.close)}
+          </span>
+          <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-bold font-mono tabular-nums ${
+            netChange >= 0 ? 'text-gain bg-gain/10' : 'text-loss bg-loss/10'
+          }`}>
+            {netChange >= 0 ? '▲ +' : '▼ '}{fmt(netChange)} ({netChangePct >= 0 ? '+' : ''}{netChangePct.toFixed(2)}%)
+          </span>
+        </div>
+        <div className="flex items-center gap-3 text-[11px] text-ink-soft font-mono">
+          <span>Range: <b className="text-ink">₹{fmt(lo)}</b> &ndash; <b className="text-ink">₹{fmt(hi)}</b></span>
+          <span className="hidden sm:inline">&middot; {bars.length} bars</span>
+        </div>
+      </div>
+
       <div className="text-xs text-ink-soft px-2 min-h-[22px] tabular-nums">
         <span className="font-medium text-ink">{cur.from === cur.to ? cur.date : `${cur.from} → ${cur.to}`}</span>
-        {'  '}O {fmt(cur.open)}  H {fmt(cur.high)}  L {fmt(cur.low)}  C{' '}
-        <span className={cur.close >= cur.open ? 'text-gain' : 'text-loss'}>{fmt(cur.close)}</span>
+        {'  '}O ₹{fmt(cur.open)}  H ₹{fmt(cur.high)}  L ₹{fmt(cur.low)}  C{' '}
+        <span className={cur.close >= cur.open ? 'text-gain' : 'text-loss'}>₹{fmt(cur.close)}</span>
         {'  '}Vol {(cur.volume / 1e6).toFixed(1)}M
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label={label}
@@ -61,12 +89,12 @@ export const CandleChart: React.FC<Props> = ({ bars, type, showSma, showVolume, 
           return (
             <g key={i}>
               <line x1={PL} x2={W - PR} y1={y(v)} y2={y(v)} stroke="rgb(var(--c-rule))" strokeDasharray="2 4" />
-              <text x={W - PR + 6} y={y(v) + 4} fontSize="11" fill="rgb(var(--c-soft))">{v > 1e4 ? Math.round(v).toLocaleString('en-IN') : v.toFixed(1)}</text>
+              <text x={W - PR + 6} y={y(v) + 4} fontSize="11" fill="rgb(var(--c-soft))">₹{v > 1e4 ? Math.round(v).toLocaleString('en-IN') : v.toFixed(1)}</text>
             </g>
           );
         })}
         {bars.map((b, i) => i % tickEvery === 0 && (
-          <text key={b.date} x={x(i)} y={H - 6} fontSize="11" textAnchor="middle" fill="rgb(var(--c-soft))">
+          <text key={`tick-${i}`} x={x(i)} y={H - 6} fontSize="11" textAnchor="middle" fill="rgb(var(--c-soft))">
             {new Date(`${b.date}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}
           </text>
         ))}
@@ -77,7 +105,7 @@ export const CandleChart: React.FC<Props> = ({ bars, type, showSma, showVolume, 
         {type === 'candle' && bars.map((b, i) => {
           const c = b.close >= b.open ? 'rgb(var(--c-gain))' : 'rgb(var(--c-loss))';
           return (
-            <g key={b.date}>
+            <g key={`candle-${i}-${b.date}`}>
               <line x1={x(i)} x2={x(i)} y1={y(b.high)} y2={y(b.low)} stroke={c} />
               <rect x={x(i) - cw / 2} y={y(Math.max(b.open, b.close))} width={cw} height={Math.max(1, Math.abs(y(b.open) - y(b.close)))}
                 fill={b.close >= b.open ? 'rgb(var(--c-inset))' : c} stroke={c} />

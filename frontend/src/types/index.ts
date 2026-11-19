@@ -155,6 +155,7 @@ export interface StockDirectoryItem {
   basePrice: number;
   sector: string;
   hasSentimentUsp: boolean;
+  exchange?: string;
 }
 
 export interface QueryHistoryItem {

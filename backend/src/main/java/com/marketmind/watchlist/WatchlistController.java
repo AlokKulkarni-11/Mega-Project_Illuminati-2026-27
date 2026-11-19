@@ -86,4 +86,17 @@ public class WatchlistController {
         }
         return ResponseEntity.ok(quote);
     }
+
+    @GetMapping("/prices/{symbol}")
+    @Operation(summary = "Get live historical candlestick price series for any stock")
+    public ResponseEntity<com.marketmind.engine.dto.PriceSeriesDto> getLivePrices(
+            @PathVariable String symbol,
+            @RequestParam(defaultValue = "260") int days
+    ) {
+        com.marketmind.engine.dto.PriceSeriesDto series = watchlistService.getPrices(symbol, days);
+        if (series == null || series.points().isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(series);
+    }
 }

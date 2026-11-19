@@ -3,8 +3,10 @@ package com.marketmind.engine.controller;
 import com.marketmind.config.CacheConfig;
 import com.marketmind.engine.InsightEngine;
 import com.marketmind.engine.dto.*;
+import com.marketmind.watchlist.LiveStockQuoteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +22,16 @@ import java.util.List;
 public class EngineController {
 
     private final InsightEngine engine;
+    private final LiveStockQuoteService liveStockQuoteService;
 
     public EngineController(InsightEngine engine) {
+        this(engine, null);
+    }
+
+    @Autowired
+    public EngineController(InsightEngine engine, @Autowired(required = false) LiveStockQuoteService liveStockQuoteService) {
         this.engine = engine;
+        this.liveStockQuoteService = liveStockQuoteService;
     }
 
     @GetMapping("/instruments")
@@ -39,6 +48,12 @@ public class EngineController {
             @PathVariable String symbol,
             @RequestParam(defaultValue = "60") int days
     ) {
+        if (liveStockQuoteService != null) {
+            PriceSeriesDto live = liveStockQuoteService.getHistoricalPrices(symbol, days);
+            if (live != null && !live.points().isEmpty()) {
+                return ResponseEntity.ok(live);
+            }
+        }
         return ResponseEntity.ok(engine.prices(symbol, days));
     }
 

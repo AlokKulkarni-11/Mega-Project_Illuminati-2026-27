@@ -189,4 +189,8 @@ public class WatchlistService {
     public LiveStockQuoteService.StockQuote getLiveQuote(String symbol) {
         return liveStockQuoteService.getLiveQuote(symbol);
     }
+
+    public com.marketmind.engine.dto.PriceSeriesDto getPrices(String symbol, int days) {
+        return liveStockQuoteService.getHistoricalPrices(symbol, days);
+    }
 }

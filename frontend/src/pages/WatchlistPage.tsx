@@ -6,7 +6,11 @@ import {
   addToWatchlistApi,
   removeFromWatchlistApi,
   searchStockDirectoryApi,
+  getLiveChartPricesApi,
 } from '../api/watchlist';
+import { CandleChart } from '../components/CandleChart';
+import { ChartControls } from '../components/ChartControls';
+import { aggregate, RANGE_DAYS, RangeKey, ChartType, Interval } from '../features/chart/chartUtils';
 import { useToast } from '../components/Toast';
 import { WatchlistItem, StockDirectoryItem, Capabilities } from '../types';
 
@@ -73,12 +77,36 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({ capabilities }) =>
     return sec.includes(query);
   });
 
+  // Active stock for interactive chart modal
+  const [chartModalStock, setChartModalStock] = useState<WatchlistItem | null>(null);
+  const [chartOpts, setChartOpts] = useState<{
+    range: RangeKey;
+    interval: Interval;
+    type: ChartType;
+    sma: boolean;
+    volume: boolean;
+  }>({
+    range: '6M',
+    interval: 'D',
+    type: 'candle',
+    sma: true,
+    volume: true,
+  });
+
+  // Fetch chart prices when modal is open
+  const { data: modalPrices, isLoading: loadingModalPrices } = useQuery({
+    queryKey: ['prices', chartModalStock?.symbol, chartOpts.range],
+    queryFn: () => getLiveChartPricesApi(chartModalStock!.symbol, 260),
+    enabled: !!chartModalStock,
+    staleTime: 60000,
+  });
+
   // Stock search autocomplete query
   const { data: searchResults } = useQuery({
     queryKey: ['stockDirectory', newSymbol],
     queryFn: () => searchStockDirectoryApi(newSymbol),
     enabled: isDropdownOpen,
-    staleTime: 60000,
+    staleTime: 5000,
   });
 
   // Close autocomplete on click outside or escape
@@ -95,6 +123,16 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({ capabilities }) =>
       document.removeEventListener('touchstart', handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && chartModalStock) {
+        setChartModalStock(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [chartModalStock]);
 
   const addMutation = useMutation({
     mutationFn: addToWatchlistApi,
@@ -147,9 +185,11 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({ capabilities }) =>
     }
   };
 
-  const formatPrice = (val?: number) => {
-    if (val === undefined || val === null) return '—';
-    return `₹${val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const formatPrice = (val?: number, exchange?: string) => {
+    if (val === undefined || val === null || val <= 0) return '—';
+    const isUs = exchange === 'NYSE' || exchange === 'NASDAQ' || exchange === 'AMEX' || exchange === 'NMS' || exchange === 'NYQ';
+    const sym = isUs ? '$' : '₹';
+    return `${sym}${val.toLocaleString(isUs ? 'en-US' : 'en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   const formatVolume = (vol?: number) => {
@@ -247,7 +287,11 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({ capabilities }) =>
                 {/* 1. Matching Stock Results with Prices & Badges */}
                 {searchResults && searchResults.length > 0 ? (
                   searchResults.map((stock: StockDirectoryItem) => {
-                    const displayTicker = stock.symbol.endsWith('.NS') ? stock.symbol : `${stock.symbol}.NS`;
+                    const exch = stock.exchange || (stock.symbol.endsWith('.BO') ? 'BSE' : stock.symbol.endsWith('.NS') ? 'NSE' : 'NSE');
+                    const displayTicker = stock.symbol.endsWith('.NS') || stock.symbol.endsWith('.BO') || stock.symbol.includes('.')
+                      ? stock.symbol
+                      : (exch === 'BSE' ? `${stock.symbol}.BO` : (exch === 'NYSE' || exch === 'NASDAQ' ? stock.symbol : `${stock.symbol}.NS`));
+
                     return (
                       <button
                         key={stock.symbol}
@@ -263,8 +307,14 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({ capabilities }) =>
                             <span className="font-mono font-bold text-sm text-slate-900 dark:text-slate-100 group-hover:text-amber-600 transition-colors">
                               {displayTicker}
                             </span>
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
-                              NSE
+                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${
+                              exch === 'BSE'
+                                ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800'
+                                : exch === 'NYSE' || exch === 'NASDAQ'
+                                ? 'bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800'
+                                : 'bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800'
+                            }`}>
+                              {exch}
                             </span>
                             {stock.hasSentimentUsp && (
                               <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
@@ -278,7 +328,7 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({ capabilities }) =>
                         </div>
                         <div className="text-right">
                           <span className="text-sm font-mono font-bold text-slate-900 dark:text-slate-100">
-                            {stock.basePrice > 0 ? formatPrice(stock.basePrice) : 'Live Quote'}
+                            {stock.basePrice > 0 ? formatPrice(stock.basePrice, exch) : 'Live Quote'}
                           </span>
                           <span className="block text-[11px] font-bold text-amber-600 dark:text-amber-400 group-hover:underline">
                             + Add to Watchlist
@@ -407,18 +457,19 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({ capabilities }) =>
                       {/* Symbol & Link */}
                       <td className="py-3.5 px-4 font-mono font-bold text-sm">
                         <div className="flex items-center gap-1.5">
-                          {item.hasSentimentUsp ? (
-                            <Link
-                              to={`/?symbol=${item.symbol}`}
-                              className="text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
-                              title="Click to view deep-dive Causal Explanation dossier in Research Desk"
-                            >
-                              <span>{item.symbol}</span>
-                              <span className="text-xs">⚡</span>
-                            </Link>
-                          ) : (
-                            <span className="text-slate-900 dark:text-slate-100">{item.symbol}</span>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => setChartModalStock(item)}
+                            className="text-slate-900 dark:text-slate-100 hover:text-amber-600 dark:hover:text-amber-400 hover:underline flex items-center gap-1 font-mono font-bold cursor-pointer text-left"
+                            title="Click to view interactive technical chart"
+                          >
+                            <span>{item.symbol}</span>
+                            {item.hasSentimentUsp ? (
+                              <span className="text-xs text-amber-500" title="AI Causal Engine tracked asset">⚡</span>
+                            ) : (
+                              <span className="text-xs text-slate-400 hover:text-amber-500 transition-colors">📈</span>
+                            )}
+                          </button>
                         </div>
                       </td>
 
@@ -513,24 +564,38 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({ capabilities }) =>
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                               📊 Live Real-Time Market Quote
                             </span>
-                            <span className="text-[10px] text-slate-400 text-center max-w-[190px] leading-tight">
-                              Technical quote active · Causal synthesis reserved for tracked USP assets
-                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setChartModalStock(item)}
+                              className="text-[11px] font-bold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 hover:underline flex items-center gap-1 mt-0.5 cursor-pointer"
+                            >
+                              <span>📈 View Live Chart →</span>
+                            </button>
                           </div>
                         )}
                       </td>
 
-                      {/* Remove Action */}
+                      {/* Action */}
                       <td className="py-3.5 px-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() => removeMutation.mutate(item.symbol)}
-                          disabled={removeMutation.isPending}
-                          className="text-rose-600 dark:text-rose-400 hover:text-rose-700 font-semibold cursor-pointer transition-colors p-1 rounded hover:bg-rose-50 dark:hover:bg-rose-950/40"
-                          title={`Remove ${item.symbol} from watchlist`}
-                        >
-                          Remove
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setChartModalStock(item)}
+                            className="text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-amber-300 dark:hover:border-amber-600 transition-all cursor-pointer"
+                            title={`View chart for ${item.symbol}`}
+                          >
+                            📈 Chart
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeMutation.mutate(item.symbol)}
+                            disabled={removeMutation.isPending}
+                            className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 font-semibold cursor-pointer transition-colors p-1 rounded hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                            title={`Remove ${item.symbol} from watchlist`}
+                          >
+                            Remove
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -577,6 +642,145 @@ export const WatchlistPage: React.FC<WatchlistPageProps> = ({ capabilities }) =>
                 + {item.symbol}
               </button>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Interactive Live Stock Chart Modal */}
+      {chartModalStock && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200"
+          onClick={() => setChartModalStock(null)}
+        >
+          <div
+            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl max-w-4xl w-full p-6 max-h-[92vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-mono font-black text-2xl text-slate-900 dark:text-slate-100">
+                    {chartModalStock.symbol}
+                  </h3>
+                  <span className="px-2 py-0.5 rounded text-xs font-bold bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                    NSE
+                  </span>
+                  {chartModalStock.hasSentimentUsp && (
+                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                      ⚡ AI Causal USP
+                    </span>
+                  )}
+                </div>
+                <div className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
+                  {chartModalStock.name || chartModalStock.symbol} · <span className="italic">{chartModalStock.sector || 'Indian Equities (NSE)'}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <div className="text-2xl font-mono font-black text-slate-950 dark:text-slate-100">
+                    {formatPrice(chartModalStock.price)}
+                  </div>
+                  {chartModalStock.change !== undefined && (
+                    <div className={`text-xs font-mono font-bold ${
+                      chartModalStock.change >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                    }`}>
+                      {chartModalStock.change >= 0 ? '+' : ''}{chartModalStock.change.toFixed(2)} ({chartModalStock.changePercent?.toFixed(2)}%)
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setChartModalStock(null)}
+                  className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 flex items-center justify-center font-bold text-sm transition-colors cursor-pointer"
+                  aria-label="Close chart"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Range / Interval Controls */}
+            <div className="mt-4">
+              <ChartControls
+                {...chartOpts}
+                onChange={(patch) => setChartOpts((o) => ({ ...o, ...patch }))}
+              />
+            </div>
+
+            {/* CandleChart Canvas */}
+            <div className="mt-3">
+              {loadingModalPrices ? (
+                <div className="h-72 flex flex-col items-center justify-center gap-2 text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+                  <span className="text-2xl animate-spin">⏳</span>
+                  <span className="text-xs font-semibold">Streaming historical market bars for {chartModalStock.symbol}…</span>
+                </div>
+              ) : (modalPrices?.points && modalPrices.points.length > 0) ? (
+                <CandleChart
+                  symbol={chartModalStock.symbol}
+                  bars={aggregate(modalPrices.points.slice(-RANGE_DAYS[chartOpts.range]), chartOpts.interval)}
+                  type={chartOpts.type}
+                  showSma={chartOpts.sma}
+                  showVolume={chartOpts.volume}
+                  label={`${chartModalStock.symbol} technical chart`}
+                />
+              ) : (
+                <div className="h-64 flex flex-col items-center justify-center gap-2 text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-2xl">
+                  <span className="text-xs">No historical candlestick bars returned for {chartModalStock.symbol}.</span>
+                </div>
+              )}
+            </div>
+
+            {/* Key Day Statistics */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 text-xs">
+              <div className="bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-xl">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Day High</span>
+                <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+                  {chartModalStock.dayHigh ? `₹${chartModalStock.dayHigh.toFixed(2)}` : '—'}
+                </span>
+              </div>
+              <div className="bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-xl">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Day Low</span>
+                <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+                  {chartModalStock.dayLow ? `₹${chartModalStock.dayLow.toFixed(2)}` : '—'}
+                </span>
+              </div>
+              <div className="bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-xl">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Volume</span>
+                <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+                  {formatVolume(chartModalStock.volume)}
+                </span>
+              </div>
+              <div className="bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-xl">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Exchange Feed</span>
+                <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                  NSE Live Market
+                </span>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+              <span className="text-xs text-slate-500 dark:text-slate-400">
+                Data refreshed dynamically from National Stock Exchange (NSE) feeds.
+              </span>
+              <div className="flex items-center gap-2">
+                <Link
+                  to={`/?symbol=${chartModalStock.symbol}`}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-amber-400 hover:bg-amber-500 text-slate-950 transition-all shadow-xs"
+                >
+                  Open in Full Research Desk →
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setChartModalStock(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
